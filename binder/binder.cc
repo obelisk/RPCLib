@@ -14,12 +14,34 @@ int readNBytes(int des, int amount, char* buffer){
 	return so_far;
 }
 
+void handleHostnameAndError(char* hostname){
+	int error = gethostname(hostname, 255);
+	if(error != 0){
+		printf("Could not get hostname. Error: %d\n", error);
+		exit(error);
+	}	
+}
+
+int bindAndListen(struct sockaddr_in ssock_s){
+	int ssock = socket(AF_INET, SOCK_STREAM, 0);
+	int error = bind(ssock, (struct sockaddr *)&ssock_s, sizeof(struct sockaddr));
+	if(-1 == error){
+		printf("bind Error: %d\n", error);
+		exit(error);
+	}
+	error = listen(ssock, 1);
+	if(-1 == error){
+		printf("listen Error: %d\n", error);
+		exit(error);
+	}
+	return ssock;
+}
+
 int main(int argc, char ** argv){
 	// Variables
 	int port = 0, error = 0, result = 0, connection = 0, first_decriptor = 0, num_connections = 10, length = 0, read_so_far=0;
 	char* hostname = (char*)malloc(255), *len_buffer = (char*)malloc(4);
 	char portStr[5];
-	cbuf_t buffers[num_connections];
 
 	struct sockaddr_in ssock_s;
 	struct sockaddr_in csock_s;
@@ -31,33 +53,15 @@ int main(int argc, char ** argv){
 	memset(&ssock_s, socksize, 0);
 
 	// Configuration
-	error = gethostname(hostname, 255);
-	if(error != 0){
-		printf("Could not get hostname. Error: %d\n", error);
-		return error;
-	}
+	handleHostnameAndError(hostname);
+
 	ssock_s.sin_family = AF_INET;
 	ssock_s.sin_addr.s_addr = INADDR_ANY;
 	ssock_s.sin_port = htons(port);
 	FD_ZERO (&fdactive);
 
 	// Initialization
-	for(int i=0; i < num_connections; ++i){
-		buffers[i].length = 0;
-		buffers[i].location = 0;
-		buffers[i].buffer = 0x0;
-	}
-	int ssock = socket(AF_INET, SOCK_STREAM, 0);
-	error = bind(ssock, (struct sockaddr *)&ssock_s, sizeof(struct sockaddr));
-	if(-1 == error){
-		printf("bind Error: %d\n", error);
-		return error;
-	}
-	error = listen(ssock, 1);
-	if(-1 == error){
-		printf("listen Error: %d\n", error);
-		return error;
-	}
+	int ssock = bindAndListen(ssock_s);
 
 	error = getsockname(ssock, (struct sockaddr *)&ssock_s, &len);
 	if(-1 == error){
@@ -79,7 +83,6 @@ int main(int argc, char ** argv){
 			printf("FD Error. Bummer.\n");
 			exit (1);
 		}
-
 		for (int des = 0; des < FD_SETSIZE; ++des){
 			if (FD_ISSET (des, &fdread)){
 				if(des == ssock){
@@ -96,13 +99,53 @@ int main(int argc, char ** argv){
 					char call_type;
 					result = readNBytes(des, 1, &call_type);
 
-					switch(call_type){
-						case RPC_REGISTER:
-							result = readNBytes(des, 4, len_buffer);
-							length = fourBytesToInt(len_buffer);
-							break;
-						case RPC_CALL:
-							break;
+					if(call_type == RPC_REGISTER){
+						std::string name, function_data;
+						char* f_data;
+
+						// Read Length of Name
+						if(readNBytes(des, 4, len_buffer) == -1){break;}
+						length = fourBytesToInt(len_buffer);
+						f_data = (char*)malloc(length*sizeof(char));
+
+						// Read name
+						result = readNBytes(des, length, f_data);
+						if(result == -1){free(f_data);break;}
+
+						// Put into better data type
+						name = std::string(f_data, length);
+						free(f_data);
+
+						// Read length of function data
+						if(readNBytes(des, 4, len_buffer) == -1){break;}
+						length = fourBytesToInt(len_buffer);
+						f_data = (char*)malloc(length*sizeof(char));
+
+						// Read function data
+						result = readNBytes(des, length, f_data);
+						if(result == -1){free(f_data);break;}
+
+						// Put into better data type
+						function_data = std::string(f_data, length);
+						free(f_data);
+
+						int error = getpeername(ssock, (struct sockaddr *)&csock_s, &len);
+						if(-1 == error){
+							printf("getsockname Error: %d\n", error);
+							return error;
+						}
+
+						struct sockaddr_in *s = (struct sockaddr_in *)&csock_s;
+						std::string ip = inet_ntoa(csock_s.sin_addr);
+
+						func_def new_function;
+						new_function.name = name;
+						new_function.function_data = function_data;
+						new_function.server_ip = ip;
+
+						function_database.push_back(new_function);
+
+					}else if(call_type == RPC_CALL){
 					}
 				}
 			}
@@ -111,12 +154,6 @@ int main(int argc, char ** argv){
 	// Closing housekeeping
 	close(ssock);
 	free(hostname);
-	for(int i = 0; i < num_connections; ++i){
-		if(buffers[i].length > 0){
-			free(buffers[i].buffer);
-		}
-	}
-	free(buffers);
 	free(len_buffer);
 	return 0;
 }
