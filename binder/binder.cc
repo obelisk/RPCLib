@@ -1,5 +1,6 @@
 #include "binder.h"
-#include "../include/rpc_consts.h"
+#include "rpc_consts.h"
+#include "rpc.h"
 
 int readNBytes(int des, int amount, char* buffer){
 	int so_far = 0, result = 0;
@@ -75,6 +76,9 @@ int main(int argc, char ** argv){
 	// Info printout
 	printf("BINDER_ADDRESS %s\n", hostname);
 	printf("BINDER_PORT %d\n", port);
+	if(VERBOSE_OUTPUT == 1){
+		printf("export BINDER_ADDRESS=\"%s\"; export BINDER_PORT=\"%d\"\n", hostname, port);
+	}
 	sprintf(portStr,"%d",port);
 
 	while (1){
@@ -129,9 +133,9 @@ int main(int argc, char ** argv){
 						function_data = std::string(f_data, length);
 						free(f_data);
 
-						int error = getpeername(ssock, (struct sockaddr *)&csock_s, &len);
+						int error = getpeername(des, (struct sockaddr *)&csock_s, &len);
 						if(-1 == error){
-							printf("getsockname Error: %d\n", error);
+							perror("getpeername: ");
 							return error;
 						}
 
@@ -143,6 +147,9 @@ int main(int argc, char ** argv){
 						new_function.function_data = function_data;
 						new_function.server_ip = ip;
 
+						if(VERBOSE_OUTPUT == 1){
+							printf("Added new function called: %s, from server at: %s\n", name.c_str(), ip.c_str());
+						}
 						function_database.push_back(new_function);
 
 					}else if(call_type == RPC_CALL){

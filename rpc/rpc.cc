@@ -16,6 +16,7 @@
 // Local headers
 #include "rpc.h"
 #include "rpc_consts.h"
+#include "util.h"
 
 using namespace std;
 char * binderAddr;
@@ -72,7 +73,7 @@ int rpcCacheCall(char* name, int* argTypes, void** args){
 
 int rpcRegister(char* name, int* argTypes, skeleton f){
 	int totalMsgSize = 0;
-	totalMsgSize += sizeof(int); 	// RPC call
+	totalMsgSize += sizeof(char); 	// RPC call
 	totalMsgSize += sizeof(int); 	// Length of funtion name
 	totalMsgSize += strlen(name); 	// Name
 	totalMsgSize += sizeof(int); 	// Size of argsarray
@@ -97,16 +98,19 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 	int nameLength = strlen(name);
 
 	// Copy in name length
-	memcpy(buffer+counter, &nameLength, sizeof(int));
-	counter += sizeof(int);
+	char int_arr[4];
+	intToArr(nameLength, int_arr); 
+	memcpy(buffer+counter, int_arr, 4);
+	counter += sizeof(4);
 
 	// Copy in name
 	memcpy(buffer+counter, name, nameLength);
 	counter = counter + nameLength;
 
 	// Copy in arg size
-	memcpy(buffer+counter, &argSize, sizeof(int));
-	counter += sizeof(int);
+	intToArr(argSize, int_arr); 
+	memcpy(buffer+counter, int_arr, 4);
+	counter += sizeof(4);
 
 	// Copy in args
 	for (int i = 0; i < argSize; i++) { 
