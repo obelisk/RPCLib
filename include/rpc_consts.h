@@ -4,3 +4,6 @@
 #define RPC_EXECUTE		0x3
 
 #define VERBOSE_OUTPUT 	1
+
+#define INPUT_BIT 	0x80000000
+#define OUTPUT_BIT 	0x40000000

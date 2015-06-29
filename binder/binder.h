@@ -12,13 +12,22 @@
 #include <string>
 
 typedef struct{
+	unsigned char input;
+	unsigned char output;
+	unsigned char type;
+	unsigned int length;
+} param_t;
+
+typedef struct{
 	std::string name;
-	std::string function_data;
+	int param_count;
+	param_t* params;
 	std::string server_ip;
-} func_def;
+} func_def_t;
+
 
 // Maps functions to server locations
-std::vector<func_def> function_database;
+std::vector<func_def_t> function_database;
 
 int fourBytesToInt(char* buffer){
 	return 	(((unsigned char)buffer[0]) << 24) +

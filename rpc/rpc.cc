@@ -83,12 +83,12 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 		argSize++;
 	}	
 
-	//Arg is not always int though? Dan please check?
+	//The size of int thing is nice, but everything
+	//will break if it's ever not 4. This is because
+	//of both client and server side issues. Wishlist
+
 	totalMsgSize += argSize * sizeof(int); // Args
-	totalMsgSize += sizeof(int); // 0
-	totalMsgSize += sizeof(int); // skeleton int*
-	totalMsgSize += sizeof(int); // skeleton void**
-	char buffer[totalMsgSize*2];
+	char buffer[totalMsgSize];
 
 	char call_type = RPC_REGISTER;
 	int counter = 0;
@@ -113,9 +113,10 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 	counter += sizeof(4);
 
 	// Copy in args
-	for (int i = 0; i < argSize; i++) { 
-		memcpy(buffer+counter, &argTypes[i], sizeof(int));
-		counter = counter + sizeof(int);
+	for (int i = 0; i < argSize; i++) {
+		intToArr(argTypes[i], int_arr); 
+		memcpy(buffer+counter, int_arr, 4);
+		counter += sizeof(4);
 	}
 
 	// Write loop

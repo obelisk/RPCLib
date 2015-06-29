@@ -1,6 +1,10 @@
-#include "binder.h"
+// Public Headers
 #include "rpc_consts.h"
 #include "rpc.h"
+#include "util.h"
+
+// Private Headers
+#include "binder.h"
 
 int readNBytes(int des, int amount, char* buffer){
 	int so_far = 0, result = 0;
@@ -40,7 +44,7 @@ int bindAndListen(struct sockaddr_in ssock_s){
 
 int main(int argc, char ** argv){
 	// Variables
-	int port = 0, error = 0, result = 0, connection = 0, first_decriptor = 0, num_connections = 10, length = 0, read_so_far=0;
+	int port = 0, error = 0, result = 0, first_decriptor = 0, length = 0, param_count = 0;
 	char* hostname = (char*)malloc(255), *len_buffer = (char*)malloc(4);
 	char portStr[5];
 
@@ -95,7 +99,6 @@ int main(int argc, char ** argv){
 					}
 					int new_des = accept(ssock, (struct sockaddr *)&csock_s, &len);
 					FD_SET(new_des, &fdactive);
-					printf("New connection on descriptor %d\n", new_des);
 				}else{
 					//Structure of calls
 					//1 byte for call type
@@ -122,16 +125,22 @@ int main(int argc, char ** argv){
 
 						// Read length of function data
 						if(readNBytes(des, 4, len_buffer) == -1){break;}
-						length = fourBytesToInt(len_buffer);
-						f_data = (char*)malloc(length*sizeof(char));
-
-						// Read function data
-						result = readNBytes(des, length, f_data);
-						if(result == -1){free(f_data);break;}
-
-						// Put into better data type
-						function_data = std::string(f_data, length);
-						free(f_data);
+						param_count = fourBytesToInt(len_buffer);
+						param_t * params = (param_t *)malloc(sizeof(param_t) * param_count);
+						int bad = 0;
+						int param;
+						for(int i=0; i < param_count; ++i){
+							if(readNBytes(des, 4, len_buffer) == -1){bad = 1; break;}
+							arrToInt(&param, len_buffer);
+							params[i].input  = (unsigned char)((param & INPUT_BIT) > 0);
+							params[i].output = (unsigned char)((param & OUTPUT_BIT) > 0);
+							params[i].type = (0x00FF0000 & param) >> 16;
+							params[i].length = 0x0000FFFF & param;
+						}
+						if(bad == 1){
+							free(params);
+							break;
+						}
 
 						int error = getpeername(des, (struct sockaddr *)&csock_s, &len);
 						if(-1 == error){
@@ -139,16 +148,27 @@ int main(int argc, char ** argv){
 							return error;
 						}
 
-						struct sockaddr_in *s = (struct sockaddr_in *)&csock_s;
 						std::string ip = inet_ntoa(csock_s.sin_addr);
 
-						func_def new_function;
+						func_def_t new_function;
 						new_function.name = name;
-						new_function.function_data = function_data;
+						new_function.param_count = param_count;
+						new_function.params = params;
 						new_function.server_ip = ip;
 
 						if(VERBOSE_OUTPUT == 1){
-							printf("Added new function called: %s, from server at: %s\n", name.c_str(), ip.c_str());
+							printf("Added new function:\n");
+							printf("\tName:\t%s\n", new_function.name.c_str());
+							printf("\tParams:\t%d\n", new_function.param_count);
+							for(int i = 0; i < new_function.param_count; ++i){
+								printf("\t\tType:\t");
+								englishType(new_function.params[i].type);
+								printf("\n");
+								printf("\t\tInput:\t%d\n", new_function.params[i].input);
+								printf("\t\tOutput:\t%d\n", new_function.params[i].output);
+								printf("\t\tLength:\t%u\n\n", new_function.params[i].length);
+							}
+							printf("\tServer:\t%s\n", new_function.server_ip.c_str());
 						}
 						function_database.push_back(new_function);
 
