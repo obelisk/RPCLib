@@ -13,7 +13,7 @@
 
 #define CHAR_ARRAY_LENGTH 100
 
-int main() {
+int main(int argc, char ** argv) {
 
   /* prepare the arguments for f0 */
   int a0 = 5;

@@ -15,6 +15,7 @@ using namespace std;
 char * binderAddr;
 char * binderPort;
 int bindDescriptor;
+
 int connectBinder() {
 	int bindDescriptor = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in bAddr;
@@ -37,12 +38,9 @@ int rpcInit(){
 		cerr << "Env variable BINDER_PORT not found" << endl;
 		return 1;
 	}
-//	if (connectBinder == ) { 
-//
-//	}
-//	if (setupListener == ) {
-//
-//	}		
+	connectBinder();
+	//if (connectBinder() == ) {}
+	//if (setupListener() == ) {}		
 	return 0;
 }
 
@@ -86,9 +84,13 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 	for (int i = 0; i < argSize; i++) { 
 		memcpy(buffer+counter, &argTypes[i], sizeof(int));
 		counter = counter + sizeof(int);
-	}	
-
-	return 0;
+	}
+	int written = 0;
+	while(written < totalMsgSize){
+		written += write(bindDescriptor, buffer+counter, totalMsgSize-written);
+	}
+	
+	return written;
 }
 
 int rpcExecute(){
