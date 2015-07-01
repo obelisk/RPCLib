@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <unistd.h>
 void intToArr(int value, char out[4]){
 	unsigned int mask = 0xFF000000;
 	out[0] = ((value & mask) >> 24);
@@ -42,4 +42,17 @@ void englishType(int type){
 			printf("Unknown");
 			break;
 	}
+}
+
+int readNBytes(int des, int amount, char* buffer){
+	int so_far = 0, result = 0;
+	while(so_far != amount){
+		result = read(des, buffer+so_far, 1);
+		if(result <= 0){
+			return -1;
+		}else{
+			so_far += result;
+		}
+	}
+	return so_far;
 }

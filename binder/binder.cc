@@ -6,19 +6,6 @@
 // Private Headers
 #include "binder.h"
 
-int readNBytes(int des, int amount, char* buffer){
-	int so_far = 0, result = 0;
-	while(so_far != amount){
-		result = read(des, buffer+so_far, 1);
-		if(result <= 0){
-			return -1;
-		}else{
-			so_far += result;
-		}
-	}
-	return so_far;
-}
-
 void handleHostnameAndError(char* hostname){
 	int error = gethostname(hostname, 255);
 	if(error != 0){
