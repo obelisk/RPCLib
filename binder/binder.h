@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 
 #include <vector>
+#include <deque>
 #include <string>
 
 typedef struct{
@@ -22,7 +23,7 @@ typedef struct{
 	std::string name;
 	int param_count;
 	param_t* params;
-	std::string server_ip;
+	std::deque<std::string> servers;
 } func_def_t;
 
 

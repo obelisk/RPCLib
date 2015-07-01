@@ -42,6 +42,37 @@ int bindAndListen(struct sockaddr_in ssock_s){
 	return ssock;
 }
 
+int findFunction(func_def_t new_function){
+	for (int i = 0; i < function_database.size(); ++i){
+		if(new_function.param_count != function_database[i].param_count){
+			continue;
+		}
+		if(new_function.name != function_database[i].name){
+			continue;
+		}
+		param_t * new_params = new_function.params;
+		param_t * check_params = function_database[i].params;
+
+		// Already checked for the same length
+		for(int j=0; j < new_function.param_count; ++j){
+			if(new_params[j].input != check_params[j].input){
+				break;
+			}
+			if(new_params[j].output != check_params[j].output){
+				break;
+			}
+			if(new_params[j].type != check_params[j].type){
+				break;
+			}
+			if(new_params[j].length != check_params[j].length){
+				break;
+			}
+			return i;
+		}
+	}
+	return NO_FUNCTION;
+}
+
 int main(int argc, char ** argv){
 	// Variables
 	int port = 0, error = 0, result = 0, first_decriptor = 0, length = 0, param_count = 0;
@@ -99,19 +130,30 @@ int main(int argc, char ** argv){
 					}
 					int new_des = accept(ssock, (struct sockaddr *)&csock_s, &len);
 					FD_SET(new_des, &fdactive);
+					if(VERBOSE_OUTPUT == 1){
+						printf("New connection\n");
+					}
 				}else{
+					if(VERBOSE_OUTPUT == 1){
+						printf("Data on existing connection\n");
+					}
 					//Structure of calls
 					//1 byte for call type
 					//Rest of bytes dependent on call type
 					char call_type;
 					result = readNBytes(des, 1, &call_type);
+					if(result == -1){
+						FD_CLR (des, &fdactive);
+						close(des);
+						break;
+					}
 
 					if(call_type == RPC_REGISTER){
 						std::string name, function_data;
 						char* f_data;
 
 						// Read Length of Name
-						if(readNBytes(des, 4, len_buffer) == -1){break;}
+						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
 						length = fourBytesToInt(len_buffer);
 						f_data = (char*)malloc(length*sizeof(char));
 
@@ -124,13 +166,13 @@ int main(int argc, char ** argv){
 						free(f_data);
 
 						// Read length of function data
-						if(readNBytes(des, 4, len_buffer) == -1){break;}
+						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
 						param_count = fourBytesToInt(len_buffer);
 						param_t * params = (param_t *)malloc(sizeof(param_t) * param_count);
 						int bad = 0;
 						int param;
 						for(int i=0; i < param_count; ++i){
-							if(readNBytes(des, 4, len_buffer) == -1){bad = 1; break;}
+							if(readNBytes(des, 4, len_buffer) == -1){bad = 1; FD_CLR(des, &fdactive); close(des); break;}
 							arrToInt(&param, len_buffer);
 							params[i].input  = (unsigned char)((param & INPUT_BIT) > 0);
 							params[i].output = (unsigned char)((param & OUTPUT_BIT) > 0);
@@ -154,7 +196,6 @@ int main(int argc, char ** argv){
 						new_function.name = name;
 						new_function.param_count = param_count;
 						new_function.params = params;
-						new_function.server_ip = ip;
 
 						if(VERBOSE_OUTPUT == 1){
 							printf("Added new function:\n");
@@ -168,9 +209,20 @@ int main(int argc, char ** argv){
 								printf("\t\tOutput:\t%d\n", new_function.params[i].output);
 								printf("\t\tLength:\t%u\n\n", new_function.params[i].length);
 							}
-							printf("\tServer:\t%s\n", new_function.server_ip.c_str());
+							printf("\tServer:\t%s\n", ip.c_str());
 						}
-						function_database.push_back(new_function);
+						int have_function = findFunction(new_function);
+						if(have_function == NO_FUNCTION){
+							if(VERBOSE_OUTPUT == 1){
+								printf("\tThis is a new function, adding to database\n");
+							}
+							function_database.push_back(new_function);
+						}else{
+							if(VERBOSE_OUTPUT == 1){
+								printf("\tThis is an already existing function, adding to server array\n");
+							}
+							function_database[have_function].servers.push_back(ip);
+						}
 
 					}else if(call_type == RPC_CALL){
 					}

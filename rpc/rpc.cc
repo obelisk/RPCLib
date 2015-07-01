@@ -126,7 +126,6 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 		if(result == -1){return result;}
 		written += result;
 	}
-	
 	// Return number of bytes written
 	return written;
 }
