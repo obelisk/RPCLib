@@ -216,6 +216,9 @@ int main(int argc, char ** argv){
 						}
 
 					}else if(call_type == RPC_CALL){
+						if(VERBOSE_OUTPUT == 1){
+							printf("Client asking for function\n");
+						}
 						// Read Length of Name
 						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
 						length = fourBytesToInt(len_buffer);
@@ -252,7 +255,8 @@ int main(int argc, char ** argv){
 						int have_function = findFunction(new_function);
 
 						if(have_function == NO_FUNCTION){
-							//TBD
+							unsigned char message_type = RPC_FAILURE;
+							write(des, &message_type, 1);
 						}else{
 							server_t server = function_database[have_function].servers.front();
 							function_database[have_function].servers.pop_front();

@@ -2,6 +2,7 @@
 #define RPC_CALL		0x1
 #define RPC_TERMINATE	0x2
 #define RPC_EXECUTE		0x3
+#define RPC_FAILURE		0x4
 
 #define VERBOSE_OUTPUT 	1
 
