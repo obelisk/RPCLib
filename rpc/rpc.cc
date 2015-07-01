@@ -55,6 +55,25 @@ int connectBinder() {
 	printf("bindDescriptor: %d\n", bindDescriptor);
 	return 0;
 }
+int clientInit() { 
+	binderAddr = getenv("BINDER_ADDRESS");
+        binderPort = getenv("BINDER_PORT");
+        if (binderAddr == NULL) {
+                cerr << "Env variable BINDER_ADDRESS not found" << endl;
+                return 1;
+        }
+        if (binderPort == NULL) {
+                cerr << "Env variable BINDER_PORT not found" << endl;
+                return 1;
+        }
+        if (connectBinder() != 0) {
+                printf("Could not connect to binder\n");
+                perror("Connect: ");
+        }else if(VERBOSE_OUTPUT == 1){
+                printf("Connecting to binder succeeded\n");
+        }
+	return 0;
+}
 int rpcInit(){
 	binderAddr = getenv("BINDER_ADDRESS");
 	binderPort = getenv("BINDER_PORT");
@@ -77,6 +96,57 @@ int rpcInit(){
 }
 
 int rpcCall(char* name, int* argTypes, void** args){
+	clientInit();
+	int binderMsgSize = 0; 
+	binderMsgSize += sizeof(char);
+	binderMsgSize += sizeof(int);
+	binderMsgSize += strlen(name);
+	binderMsgSize += sizeof(int);
+	int argSize = 0;
+
+	while (argTypes[argSize]) { 
+		argSize++;
+	}
+	binderMsgSize += argSize * sizeof(int);
+
+	char buffer[binderMsgSize];
+	// writing rpc call
+	char call_type = RPC_CALL;
+	int counter = 0;
+	memcpy(buffer+counter, &call_type, sizeof(char));
+	counter += sizeof(char);
+
+	// writting namelength
+	int nameLength = strlen(name);
+	char int_arr[4];
+	intToArr(nameLength, int_arr);
+	memcpy(buffer+counter, int_arr, 4);
+	counter += sizeof(4);
+
+	// writting name
+	memcpy(buffer+counter, name, nameLength);
+	counter += nameLength;
+
+	// writting arg size
+	intToArr(argSize, int_arr);
+	memcpy(buffer+counter, int_arr, 4);
+	counter += sizeof(4);
+
+	// writing args
+	for (int i = 0; i < argSize; i++) { 
+		intToArr(argTypes[i], int_arr);
+		memcpy(buffer+counter, int_arr, 4);
+		counter += sizeof(4);
+	}
+	
+	int written = 0, result = 0;
+	while (written < binderMsgSize) { 
+		result = write(bindDescriptor, buffer+written, binderMsgSize-written);
+		if (result == -1) { 
+			return result;
+		}
+		written += result;
+	}
 	return 0;
 }
 
