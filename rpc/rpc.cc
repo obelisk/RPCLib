@@ -55,23 +55,24 @@ int connectBinder() {
 }
 int clientInit() { 
 	binderAddr = getenv("BINDER_ADDRESS");
-        binderPort = getenv("BINDER_PORT");
-        if (binderAddr == NULL) {
-                cerr << "Env variable BINDER_ADDRESS not found" << endl;
-                return 1;
-        }
-        if (binderPort == NULL) {
-                cerr << "Env variable BINDER_PORT not found" << endl;
-                return 1;
-        }
-        if (connectBinder() != 0) {
-                printf("Could not connect to binder\n");
-                perror("Connect: ");
-        }else if(VERBOSE_OUTPUT == 1){
-                printf("Connecting to binder succeeded\n");
-        }
+    binderPort = getenv("BINDER_PORT");
+    if (binderAddr == NULL) {
+            cerr << "Env variable BINDER_ADDRESS not found" << endl;
+            return 1;
+    }
+    if (binderPort == NULL) {
+            cerr << "Env variable BINDER_PORT not found" << endl;
+            return 1;
+    }
+    if (connectBinder() != 0) {
+            printf("Could not connect to binder\n");
+            perror("Connect: ");
+    }else if(VERBOSE_OUTPUT == 1){
+            printf("Connecting to binder succeeded\n");
+    }
 	return 0;
 }
+
 int rpcInit(){
 	binderAddr = getenv("BINDER_ADDRESS");
 	binderPort = getenv("BINDER_PORT");

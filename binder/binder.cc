@@ -141,11 +141,11 @@ int main(int argc, char ** argv){
 						close(des);
 						break;
 					}
+					char* f_data;
+					std::string name;
 
 					if(call_type == RPC_REGISTER){
-						std::string name, function_data;
-						char* f_data;
-
+						// Read server port
 						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
 						server_port = fourBytesToInt(len_buffer);
 
@@ -229,6 +229,57 @@ int main(int argc, char ** argv){
 						}
 
 					}else if(call_type == RPC_CALL){
+						// Read Length of Name
+						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
+						length = fourBytesToInt(len_buffer);
+						f_data = (char*)malloc(length*sizeof(char));
+
+						// Read name
+						result = readNBytes(des, length, f_data);
+						if(result == -1){free(f_data);break;}
+
+						// Put into better data type
+						name = std::string(f_data, length);
+						free(f_data);
+
+						// Read length of function data
+						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
+						param_count = fourBytesToInt(len_buffer);
+						param_t * params = (param_t *)malloc(sizeof(param_t) * param_count);
+						int bad = 0;
+						int param;
+						for(int i=0; i < param_count; ++i){
+							if(readNBytes(des, 4, len_buffer) == -1){bad = 1; FD_CLR(des, &fdactive); close(des); break;}
+							arrToInt(&param, len_buffer);
+							params[i].input  = (unsigned char)((param & INPUT_BIT) > 0);
+							params[i].output = (unsigned char)((param & OUTPUT_BIT) > 0);
+							params[i].type = (0x00FF0000 & param) >> 16;
+							params[i].length = 0x0000FFFF & param;
+						}
+
+						func_def_t new_function;
+						new_function.name = name;
+						new_function.param_count = param_count;
+						new_function.params = params;
+
+						int have_function = findFunction(new_function);
+
+						if(have_function == NO_FUNCTION){
+							//TBD
+						}else{
+							server_t server = function_database[have_function].servers.front();
+							function_database[have_function].servers.pop_front();
+							function_database[have_function].servers.push_back(server);
+							unsigned char message_type = RPC_CALL;
+							write(des, &message_type, 1);
+							char int_arr[4];
+							intToArr(server.server.length(), int_arr);
+							write(des, &int_arr, 4);
+							write(des, server.server.c_str(), server.server.length());
+
+							intToArr(server.port, int_arr);
+							write(des, &int_arr, 4);
+						}
 					}
 				}
 			}
