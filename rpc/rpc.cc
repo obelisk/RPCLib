@@ -68,7 +68,7 @@ int clientInit() {
             printf("Could not connect to binder\n");
             perror("Connect: ");
     }else if(VERBOSE_OUTPUT == 1){
-            printf("Connecting to binder succeeded\n");
+            printf("Connecting to binder succeeded2\n");
     }
 	return 0;
 }
@@ -96,6 +96,7 @@ int rpcInit(){
 
 int rpcCall(char* name, int* argTypes, void** args){
 	clientInit();
+//	cout << "shit " << endl;
 	int binderMsgSize = 0; 
 	binderMsgSize += sizeof(char);
 	binderMsgSize += sizeof(int);
@@ -137,7 +138,7 @@ int rpcCall(char* name, int* argTypes, void** args){
 		memcpy(buffer+counter, int_arr, 4);
 		counter += sizeof(4);
 	}
-	
+//	cout << "noob " << endl;
 	int written = 0, result = 0;
 	while (written < binderMsgSize) { 
 		result = write(bindDescriptor, buffer+written, binderMsgSize-written);
@@ -145,6 +146,24 @@ int rpcCall(char* name, int* argTypes, void** args){
 			return result;
 		}
 		written += result;
+	}
+	char call;
+	int result2 = 0;
+	result2 = readNBytes(bindDescriptor, 1, &call);
+	cout << result2 << endl;
+	if (call == RPC_CALL) { 
+		char hostnameLength[4];
+		char * hostname;
+		result2 = readNBytes(bindDescriptor, 4, hostnameLength);
+		int length;
+		arrToInt(&length, hostnameLength);
+		hostname = (char*)malloc((length+1)*sizeof(char));
+		hostname[length] = '\0';
+		result2 = readNBytes(bindDescriptor,length, hostname);
+		char port[4];
+		result2 = readNBytes(bindDescriptor,4,port);
+		int portNumber = 0;
+		arrToInt(&portNumber, port);
 	}
 	return 0;
 }
