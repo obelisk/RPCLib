@@ -75,7 +75,7 @@ int findFunction(func_def_t new_function){
 
 int main(int argc, char ** argv){
 	// Variables
-	int port = 0, error = 0, result = 0, first_decriptor = 0, length = 0, param_count = 0;
+	int port = 0, server_port = 0, error = 0, result = 0, first_decriptor = 0, length = 0, param_count = 0;
 	char* hostname = (char*)malloc(255), *len_buffer = (char*)malloc(4);
 	char portStr[5];
 
@@ -134,12 +134,6 @@ int main(int argc, char ** argv){
 						printf("New connection\n");
 					}
 				}else{
-					if(VERBOSE_OUTPUT == 1){
-						printf("Data on existing connection\n");
-					}
-					//Structure of calls
-					//1 byte for call type
-					//Rest of bytes dependent on call type
 					char call_type;
 					result = readNBytes(des, 1, &call_type);
 					if(result == -1){
@@ -151,6 +145,9 @@ int main(int argc, char ** argv){
 					if(call_type == RPC_REGISTER){
 						std::string name, function_data;
 						char* f_data;
+
+						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
+						server_port = fourBytesToInt(len_buffer);
 
 						// Read Length of Name
 						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
@@ -210,18 +207,25 @@ int main(int argc, char ** argv){
 								printf("\t\tLength:\t%u\n\n", new_function.params[i].length);
 							}
 							printf("\tServer:\t%s\n", ip.c_str());
+							printf("\tPort:\t%d\n", server_port);
 						}
 						int have_function = findFunction(new_function);
+
+						server_t new_location;
+						new_location.server = ip;
+						new_location.port = server_port;
+
 						if(have_function == NO_FUNCTION){
 							if(VERBOSE_OUTPUT == 1){
 								printf("\tThis is a new function, adding to database\n");
 							}
+							new_function.servers.push_back(new_location);
 							function_database.push_back(new_function);
 						}else{
 							if(VERBOSE_OUTPUT == 1){
 								printf("\tThis is an already existing function, adding to server array\n");
 							}
-							function_database[have_function].servers.push_back(ip);
+							function_database[have_function].servers.push_back(new_location);
 						}
 
 					}else if(call_type == RPC_CALL){

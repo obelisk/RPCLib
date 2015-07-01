@@ -24,8 +24,6 @@ char * binderPort;
 int bindDescriptor;
 int serverDescriptor;
 
-
-
 int setupListener() {
         int s = socket(AF_INET,SOCK_STREAM, 0);
         struct sockaddr_in sAddr;
@@ -112,34 +110,33 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 	int nameLength = strlen(name);
 	
 	// copying port
-	char port_arry[4]; 
+ 	char int_arr[4];
 	struct sockaddr_in sin;
-        socklen_t addrlen = sizeof(sin);
-        getsockname(serverDescriptor, (struct sockaddr *)&sin, &addrlen);
-	intToArr(ntohs(sin.sin_port), port_arry);
-        memcpy(buffer+counter, port_arry, sizeof(int));
+    socklen_t addrlen = sizeof(sin);
+    getsockname(serverDescriptor, (struct sockaddr *)&sin, &addrlen);
+	intToArr(ntohs(sin.sin_port), int_arr);
+    memcpy(buffer+counter, int_arr, sizeof(int));
 	counter += sizeof(int);
 
 	// Copy in name length
-	char int_arr[4];
 	intToArr(nameLength, int_arr); 
 	memcpy(buffer+counter, int_arr, 4);
-	counter += sizeof(4);
+	counter += sizeof(int);
 
 	// Copy in name
 	memcpy(buffer+counter, name, nameLength);
-	counter = counter + nameLength;
+	counter += nameLength;
 
 	// Copy in arg size
 	intToArr(argSize, int_arr); 
 	memcpy(buffer+counter, int_arr, 4);
-	counter += sizeof(4);
+	counter += sizeof(int);
 
 	// Copy in args
 	for (int i = 0; i < argSize; i++) {
 		intToArr(argTypes[i], int_arr); 
 		memcpy(buffer+counter, int_arr, 4);
-		counter += sizeof(4);
+		counter += sizeof(int);
 	}
 
 	// Write loop

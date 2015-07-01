@@ -20,10 +20,15 @@ typedef struct{
 } param_t;
 
 typedef struct{
+	std::string server;
+	int port;
+} server_t;
+
+typedef struct{
 	std::string name;
 	int param_count;
 	param_t* params;
-	std::deque<std::string> servers;
+	std::deque<server_t> servers;
 } func_def_t;
 
 
