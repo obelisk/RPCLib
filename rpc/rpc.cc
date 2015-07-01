@@ -22,6 +22,19 @@ using namespace std;
 char * binderAddr;
 char * binderPort;
 int bindDescriptor;
+int serverDescriptor;
+
+
+
+int setupListener() {
+        int s = socket(AF_INET,SOCK_STREAM, 0);
+        struct sockaddr_in sAddr;
+        sAddr.sin_family = AF_INET;
+        sAddr.sin_addr.s_addr = INADDR_ANY;
+        sAddr.sin_port = 0;
+        bind (s, (struct sockaddr *)&sAddr, sizeof(sAddr));
+        return s;
+}
 
 int connectBinder() {
 	struct hostent     *he;
@@ -59,7 +72,7 @@ int rpcInit(){
 	}else if(VERBOSE_OUTPUT == 1){
 		printf("Connecting to binder succeeded\n");
 	}
-	//if (setupListener() == ) {}		
+	serverDescriptor = setupListener();
 	return 0;
 }
 
@@ -74,6 +87,7 @@ int rpcCacheCall(char* name, int* argTypes, void** args){
 int rpcRegister(char* name, int* argTypes, skeleton f){
 	int totalMsgSize = 0;
 	totalMsgSize += sizeof(char); 	// RPC call
+	totalMsgSize += sizeof(int);    // server port;
 	totalMsgSize += sizeof(int); 	// Length of funtion name
 	totalMsgSize += strlen(name); 	// Name
 	totalMsgSize += sizeof(int); 	// Size of argsarray
@@ -96,6 +110,15 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 
 	counter += sizeof(char);
 	int nameLength = strlen(name);
+	
+	// copying port
+	char port_arry[4]; 
+	struct sockaddr_in sin;
+        socklen_t addrlen = sizeof(sin);
+        getsockname(serverDescriptor, (struct sockaddr *)&sin, &addrlen);
+	intToArr(ntohs(sin.sin_port), port_arry);
+        memcpy(buffer+counter, port_arry, sizeof(int));
+	counter += sizeof(int);
 
 	// Copy in name length
 	char int_arr[4];
