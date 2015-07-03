@@ -133,11 +133,11 @@ int main(int argc, char ** argv){
 					if(call_type == RPC_REGISTER){
 						// Read server port
 						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
-						server_port = fourBytesToInt(len_buffer);
+						arrToInt(&server_port, len_buffer);
 
 						// Read Length of Name
 						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
-						length = fourBytesToInt(len_buffer);
+						arrToInt(&length, len_buffer);
 						f_data = (char*)malloc(length*sizeof(char));
 
 						// Read name
@@ -150,7 +150,7 @@ int main(int argc, char ** argv){
 
 						// Read length of function data
 						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
-						param_count = fourBytesToInt(len_buffer);
+						arrToInt(&param_count, len_buffer);
 						param_t * params = (param_t *)malloc(sizeof(param_t) * param_count);
 						int bad = 0;
 						int param;
@@ -220,7 +220,7 @@ int main(int argc, char ** argv){
 						}
 						// Read Length of Name
 						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
-						length = fourBytesToInt(len_buffer);
+						arrToInt(&length, len_buffer);
 						f_data = (char*)malloc(length*sizeof(char));
 
 						// Read name
@@ -233,7 +233,7 @@ int main(int argc, char ** argv){
 
 						// Read length of function data
 						if(readNBytes(des, 4, len_buffer) == -1){FD_CLR (des, &fdactive);close(des);break;}
-						param_count = fourBytesToInt(len_buffer);
+						arrToInt(&param_count, len_buffer);
 						param_t * params = (param_t *)malloc(sizeof(param_t) * param_count);
 						int bad = 0;
 						int param;

@@ -19,10 +19,3 @@
 
 // Maps functions to server locations
 std::vector<func_def_t> function_database;
-
-int fourBytesToInt(char* buffer){
-	return 	(((unsigned char)buffer[0]) << 24) +
-			(((unsigned char)buffer[1]) << 16) +
-			(((unsigned char)buffer[2]) << 8)  +
-			 ((unsigned char)buffer[3]);			
-}
