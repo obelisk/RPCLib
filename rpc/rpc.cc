@@ -96,7 +96,6 @@ int rpcInit(){
 
 int rpcCall(char* name, int* argTypes, void** args){
 	clientInit();
-//	cout << "shit " << endl;
 	int binderMsgSize = 0; 
 	binderMsgSize += sizeof(char);
 	binderMsgSize += sizeof(int);
@@ -138,7 +137,7 @@ int rpcCall(char* name, int* argTypes, void** args){
 		memcpy(buffer+counter, int_arr, 4);
 		counter += sizeof(4);
 	}
-//	cout << "noob " << endl;
+
 	int written = 0, result = 0;
 	while (written < binderMsgSize) { 
 		result = write(bindDescriptor, buffer+written, binderMsgSize-written);
@@ -147,7 +146,7 @@ int rpcCall(char* name, int* argTypes, void** args){
 		}
 		written += result;
 	}
-//	cout << "written " << written << endl;
+
 	char call;
 	int result2 = 0;
 	result2 = readNBytes(bindDescriptor, 1, &call);
@@ -156,24 +155,18 @@ int rpcCall(char* name, int* argTypes, void** args){
 	char port[4];
 	int portNumber = 0;
 	if (call == RPC_CALL) { 
-	//	char hostnameLength[4];
-	//	char * hostname;
+
 		result2 = readNBytes(bindDescriptor, 4, hostnameLength);
 		int length;
 		arrToInt(&length, hostnameLength);
 		hostname = (char*)malloc((length+1)*sizeof(char));
 		hostname[length] = '\0';
 		result2 = readNBytes(bindDescriptor,length, hostname);
-	//	char port[4];
-	//	port[4] = '\0';
+
 		result2 = readNBytes(bindDescriptor,4,port);
-	//	int portNumber = 0;
+
 		arrToInt(&portNumber, port);
-//		cout << "portNumber " << port << endl;
 	}
-//	cout << "shit " << endl;
-//	cout << "hostname " << hostname << endl;
-//	cout << "port number " << portNumber << endl;
 	int s = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in sAddr;
 	sAddr.sin_family = AF_INET;
@@ -182,9 +175,10 @@ int rpcCall(char* name, int* argTypes, void** args){
 	int sPort = portNumber;
 	sAddr.sin_port = htons(sPort);
 	int check = connect(s, (struct sockaddr *)&sAddr, sizeof(sAddr));
-//	cout << "connected? " << check << endl;
-	
-
+	if (check == -1){
+		printf("Connection Failure\n");
+		return -1;
+	}
 
 	int callMsgSize = 0;
 	callMsgSize += sizeof(char);
@@ -228,46 +222,32 @@ int rpcCall(char* name, int* argTypes, void** args){
 	char callBuffer[callMsgSize];
 	
 	// writing rpc call
-        char call_type2 = RPC_CALL;
-        counter = 0;
-        memcpy(callBuffer+counter, &call_type, sizeof(char));
-        counter += sizeof(char);
+	counter = 0;
+	memcpy(callBuffer+counter, &call_type, sizeof(char));
+	counter += sizeof(char);
 
-        // writting namelength
-        nameLength = strlen(name);
-        char int_arr2[4];
-        intToArr(nameLength, int_arr2);
-        memcpy(callBuffer+counter, int_arr2, 4);
-        counter += sizeof(4);
+	// writting namelength
+	nameLength = strlen(name);
+	char int_arr2[4];
+	intToArr(nameLength, int_arr2);
+	memcpy(callBuffer+counter, int_arr2, 4);
+	counter += sizeof(4);
 
-        // writting name
-        memcpy(callBuffer+counter, name, nameLength);
-        counter += nameLength;
+	// writting name
+	memcpy(callBuffer+counter, name, nameLength);
+	counter += nameLength;
 
-        // writting arg size
-        intToArr(argSize, int_arr2);
-        memcpy(callBuffer+counter, int_arr2, 4);
-        counter += sizeof(4);
+	// writting arg size
+	intToArr(argSize, int_arr2);
+	memcpy(callBuffer+counter, int_arr2, 4);
+	counter += sizeof(4);
 
-        // writing args
-        for (int i = 0; i < argSize; i++) {
-                intToArr(argTypes[i], int_arr2);
-                memcpy(callBuffer+counter, int_arr2, 4);
-                counter += sizeof(4);
-        }
-
-//	int copyIndex = 0;
-/*	while(buffer[copyIndex]) { 
-		int x = 0;
-		cout << "callMsgSize " << callMsgSize <<endl;
-		cout << "shittttttttttt " << copyIndex << endl;
-		if (copyIndex == 1) { 
-			arrToInt(&x, buffer+copyIndex);
-			cout << "here! " << x << endl;
-		}
-		callBuffer[copyIndex] = buffer[copyIndex];
-		copyIndex++;
-	}*/
+	// writing args
+	for (int i = 0; i < argSize; i++) {
+		intToArr(argTypes[i], int_arr2);
+		memcpy(callBuffer+counter, int_arr2, 4);
+		counter += sizeof(4);
+	}
 	int argsIndex = 0;
 	
 	while (argTypes[argsIndex]) {
@@ -465,20 +445,6 @@ int rpcExecute(){
 			}
 		}
 	}
-/*	struct sockaddr_in csock_s;
-	socklen_t len = sizeof(csock_s);
-	for (;;) { 
-		int s = accept(serverDescriptor, (struct sockaddr*)&csock_s, (socklen_t*)&len);
-//		cout << "New Connection " << endl;
-		char call;
-		int result = 0;
-		result = readNBytes(serverDescriptor, 1, &call);
-		cout << "hello " << result << " server" << serverDescriptor <<  endl;
-		if(call == RPC_CALL) {
-			cout << "hi " << endl;
-		} 
-		
-	}*/
 	return 0;
 }
 

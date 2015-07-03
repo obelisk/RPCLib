@@ -1,3 +1,4 @@
+// Standard C Headers
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -8,29 +9,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+// Stardard C++ Headers
 #include <vector>
 #include <deque>
 #include <string>
 
-typedef struct{
-	unsigned char input;
-	unsigned char output;
-	unsigned char type;
-	unsigned int length;
-} param_t;
-
-typedef struct{
-	std::string server;
-	int port;
-} server_t;
-
-typedef struct{
-	std::string name;
-	int param_count;
-	param_t* params;
-	std::deque<server_t> servers;
-} func_def_t;
-
+// Local Headers
+#include "util.h"
 
 // Maps functions to server locations
 std::vector<func_def_t> function_database;
