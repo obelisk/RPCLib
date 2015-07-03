@@ -1,7 +1,6 @@
 // Public Headers
 #include "rpc_consts.h"
 #include "rpc.h"
-#include "util.h"
 
 // Private Headers
 #include "binder.h"

@@ -1,5 +1,26 @@
 #include <stdio.h>
 #include <unistd.h>
+
+// Used in binder and rpcCall
+typedef struct{
+	unsigned char input;
+	unsigned char output;
+	unsigned char type;
+	unsigned int length;
+} param_t;
+
+typedef struct{
+	std::string server;
+	int port;
+} server_t;
+
+typedef struct{
+	std::string name;
+	int param_count;
+	param_t* params;
+	std::deque<server_t> servers;
+} func_def_t;
+
 void intToArr(int value, char out[4]){
 	unsigned int mask = 0xFF000000;
 	out[0] = ((value & mask) >> 24);

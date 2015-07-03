@@ -155,7 +155,6 @@ int rpcCall(char* name, int* argTypes, void** args){
 	char port[4];
 	int portNumber = 0;
 	if (call == RPC_CALL) { 
-
 		result2 = readNBytes(bindDescriptor, 4, hostnameLength);
 		int length;
 		arrToInt(&length, hostnameLength);
