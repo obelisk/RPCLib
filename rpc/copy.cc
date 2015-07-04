@@ -7,13 +7,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <map>
 
 //C++ Headers
 #include <iostream>
 #include <string>
 #include <cstring>
-#include <map>
-#include <vector>
 
 // Local headers
 #include "rpc.h"
@@ -197,7 +196,6 @@ int rpcCall(char* name, int* argTypes, void** args){
 	while (argTypes[index]) { 
 		int variableType = (argTypes[index] >> 16) & 255;
 		int variableLength = argTypes[index] & 65535;
-		cout << "VTYPE " << variableType << endl;
 		if (variableLength == 0) { 
 			variableLength = 1;
 		}
@@ -222,7 +220,7 @@ int rpcCall(char* name, int* argTypes, void** args){
 		index++;
 	}
 	char callBuffer[callMsgSize];
-	cout << "callMSgSize " << callMsgSize << endl;	
+	
 	// writing rpc call
 	counter = 0;
 	memcpy(callBuffer+counter, &call_type, sizeof(char));
@@ -241,7 +239,6 @@ int rpcCall(char* name, int* argTypes, void** args){
 
 	// writting arg size
 	intToArr(argSize, int_arr2);
-	cout << "client argsize " << argSize << endl;
 	memcpy(callBuffer+counter, int_arr2, 4);
 	counter += sizeof(4);
 
@@ -250,16 +247,13 @@ int rpcCall(char* name, int* argTypes, void** args){
 		intToArr(argTypes[i], int_arr2);
 		memcpy(callBuffer+counter, int_arr2, 4);
 		counter += sizeof(4);
-		cout << "shit " << counter << endl;
 	}
 	int argsIndex = 0;
-	int size = 0;
+	
 	while (argTypes[argsIndex]) {
-		cout << "argsIndex1 " << counter << endl;
                 int variableType = (argTypes[argsIndex] >> 16) & 255;
                 int variableLength = argTypes[argsIndex] & 65535;
-	//	int size = 0;
-		cout << "VTYPE " << variableType << endl;		
+		int size = 0;
 		if (variableLength == 0) { 
 			variableLength = 1;
 		}
@@ -281,13 +275,9 @@ int rpcCall(char* name, int* argTypes, void** args){
                 if (variableType == 6){
                         size = sizeof(float)*variableLength;
                 }
-		int testValue = 0;
-		arrToInt(&testValue, (char*)(args[argsIndex]));
-		cout << "testValue " << testValue << endl;
 		memcpy(callBuffer+counter, args[argsIndex], size);
 		argsIndex++;
 		counter += size;
-		cout << "argsIndex " << counter << endl;
         }
 	written = 0, result = 0;
 	while (written < callMsgSize) {
@@ -301,91 +291,7 @@ int rpcCall(char* name, int* argTypes, void** args){
 		}
 		written += result;
 	} 
-	char rpcEXEC; 
-	result = readNBytes(s, 1, &rpcEXEC);
-	char len_buffer[4];
-	int length = 0;
-	int param_count = 0;
-	char* f_data;
-	if (rpcEXEC == RPC_EXECUTE) {
-		cout << "got here" << endl; 
-		if(readNBytes(s, 4, len_buffer) == -1) { 
-			close(s);
-		//	FD_CLR(s, &master);
-	//		break;
-		}
-		arrToInt(&length, len_buffer);
-		f_data = (char*)malloc((length+1) * sizeof(char));
-		f_data[length] = '\0';
-		result = readNBytes(s, length, f_data);
-		if (result == -1) { 
-			free(f_data);
-	//		break;
-		}	
-	//	memcpy(name, f_data, length);
-		free(f_data);
-		if (readNBytes(s, 4, len_buffer) == -1) { 
-			close(s);
-		//	FD_CLR(s, &master);
-	//		break;
-		}
-		arrToInt(&param_count, len_buffer);
-		param_t * params = (param_t*)malloc(sizeof(param_t)*param_count);
-		int bad = 0;
-		int param;
-		int totalLength = 0;
-		int paramSize[param_count];
-		for (int x = 0; x < param_count; ++x) { 
-			if (readNBytes(s, 4, len_buffer) == -1) { 
-				bad = 1;
-				close(s);
-		//		FD_CLR(s, &master);
-			}
-				
-			arrToInt(&param, len_buffer);
-			params[x].input = (unsigned char)((param & INPUT_BIT) > 0);
-			params[x].output = (unsigned char)((param & OUTPUT_BIT) > 0);
-			params[x].type = (0x00FF0000 & param) >> 16;
-			params[x].length = 0x0000FFFF & param;
-			int tempLength = 1;
-			if (params[x].length > tempLength) { 
-				tempLength = params[x].length;
-			}
-			int paramLength = 0;
-			switch (params[x].type) { 
-				case ARG_CHAR: 
-                                       paramLength = sizeof(char) * tempLength;
-                                                                case ARG_SHORT:
-                                                                        paramLength = sizeof(short) * tempLength;
-                                                                case ARG_INT:
-                                                                        paramLength = sizeof(int) * tempLength;
-                                                                case ARG_LONG:
-                                                                        paramLength = sizeof(long) * tempLength;
-                                                                case ARG_DOUBLE:
-                                                                        paramLength = sizeof(double) * tempLength;
-                                                                case ARG_FLOAT:
-                                                                        paramLength = sizeof(float) * tempLength;
 
-			}
-			totalLength += 4;
-			paramSize[x] = paramLength;
-		}
-		if (bad == 1)  {
-			free(params);
-		}	
-//		void * tempArgs[param_count];
-		for (int x =  0; x < param_count; x++) { 
-			//char *temp_buffer = (char*)malloc(paramSize[x]);
-		//	args[x] = (void *) temp_buffer;
-		//	if (readNBytes(s, paramSize[x], temp_buffer) == -1) { 
-		//		close(s);
-		//	}
-			cout << paramSize[x] << endl;
-//			memcpy(args[x], temp_buffer, paramSize[x]);
-		}	
-		
-		
-	}
 	return 0;
 }
 
@@ -402,13 +308,11 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 	totalMsgSize += sizeof(int); 	// Size of argsarray
 	string str = name;
 	int argSize = 0;
-	while (argTypes[argSize]) { 
-		str += to_string(argTypes[argSize]);
+	while (argTypes[argSize]) {
+		str += itoa(argTypes[argSize]); 
 		argSize++;
-	}
-	myMap[str] = f;
-	cout << "map key is here " << str << endl;	
-
+	}	
+	myMap[name] = f;	
 	//The size of int thing is nice, but everything
 	//will break if it's ever not 4. This is because
 	//of both client and server side issues. Wishlist
@@ -429,7 +333,6 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
     socklen_t addrlen = sizeof(sin);
     getsockname(serverDescriptor, (struct sockaddr *)&sin, &addrlen);
 	intToArr(ntohs(sin.sin_port), int_arr);
-	cout << "LISTENING PORT IS " << ntohs(sin.sin_port) << endl;
     memcpy(buffer+counter, int_arr, sizeof(int));
 	counter += sizeof(int);
 
@@ -466,7 +369,6 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 }
 
 int rpcExecute(){
-//	return 0;
 	listen(serverDescriptor, 5);
 	struct sockaddr_in csock_s;
 	socklen_t len = sizeof(csock_s);
@@ -509,7 +411,6 @@ int rpcExecute(){
 					}
 					char* f_data;
 					string name;
-					string mapKey;
 					char len_buffer[4];
 					int length = 0;
 					int param_count = 0;
@@ -534,200 +435,36 @@ int rpcExecute(){
 						}
 						cout << "got name" << endl;
 						name = string(f_data, length);
-						mapKey = name;
 						cout << "function name " << name << endl;
 						free(f_data);
 						
-						if (readNBytes(i, 4, len_buffer) == -1) {
-							cout << "error " << endl; 
+						if (readNBytes(i, 4, len_buffer) == -1) { 
 							close(i);
-							FD_CLR (i, &master);
-							break;	
+							FD_CLR(i, &master);
+							break;
 						} 	
 						arrToInt(&param_count, len_buffer);
-						param_t * params = (param_t *)malloc(sizeof(param_t)* param_count);
-						cout <<  "param count " << param_count << endl;	
+						param_t * params = (param_t *)malloc(sizeof(param_t) * param_count);
 						int bad = 0;
 						int param;
-						int totalLength = 0;
-						int paramSize[param_count];
-						int tempArgsArray[param_count];
-						vector<int> outputIndexs;
-						vector<int> outputSize;
-						vector<char> outputType;
-						for (int x = 0; x < param_count; ++x){
-							cout << "got in for loop " << endl;
-							if (readNBytes(i, 4, len_buffer) == -1){
-								cout << "error1" << endl;
+						for (int i = 0; i < param_count; ++i) { 
+							if(readNBytes(i, 4, len_buffer) == -1) { 
 								bad = 1;
-								close(i);
 								FD_CLR(i, &master);
+								close (i);
+								break;
 							}
-							cout << "read stuff " << endl;
 							arrToInt(&param, len_buffer);
-							mapKey += to_string(param);
-							tempArgsArray[x] = param;
-							params[x].input = (unsigned char)((param & INPUT_BIT) > 0);
-							params[x].output = (unsigned char)((param & OUTPUT_BIT) > 0);
-							params[x].type = (0x00FF0000 & param) >> 16;
-							params[x].length = 0x0000FFFF & param;
-							int tempLength = 1;
-							if (params[x].length > tempLength) { 
-								tempLength = params[x].length;
-							}
-							int paramLength = 0;
-							switch(params[x].type) { 
-								case ARG_CHAR:
-									paramLength = sizeof(char) * tempLength;
-								case ARG_SHORT:
-									paramLength = sizeof(short) * tempLength;
-								case ARG_INT:
-									paramLength = sizeof(int) * tempLength;
-								case ARG_LONG:
-									paramLength = sizeof(long) * tempLength;
-								case ARG_DOUBLE:
-									paramLength = sizeof(double) * tempLength;
-								case ARG_FLOAT:
-									paramLength = sizeof(float) * tempLength;
-							}
-							if (params[x].output > 0) { 
-								outputIndexs.push_back(x);
-								outputSize.push_back(paramLength);
-								outputType.push_back(params[x].type);
-							}
-							totalLength += 4;
-							paramSize[x] = paramLength;
-						} 					
+							params[i].input = (unsigned char)((param & INPUT_BIT) > 0);
+							params[i].output = (unsigned char)((param & OUTPUT_BIT) > 0);
+							params[i].type = (0x00FF0000 & param) >> 16;
+							params[i].length = 0x0000FFFF & param;
+						}					
 						if (bad == 1) { 
-							cout << "error2" << endl;
 							free(params);
 							break;
 						}
-						cout << "map key2 is " << mapKey << endl;
-						void * tempArgs[param_count];
-
-
-					//	int responseSize = 0;
-					//	int responseCounter = 0;
-						for (int x = 0; x < param_count; x++) { 
-							char *temp_buffer = (char*)malloc(paramSize[x]);
-							tempArgs[x] = (void *)temp_buffer;
-							if (readNBytes(i, paramSize[x], temp_buffer) == -1){ 
-								close(i);
-								FD_CLR(i, &master);
-							}
-						}
-						skeleton newf = myMap.find(mapKey)->second;
-						int skeletonResult = newf(tempArgsArray, tempArgs);
-						cout << "skeletonResult " << skeletonResult << endl;
-						int responseSize = 0;
-						int responseCounter = 0;
-						responseSize += sizeof(char); // rpc call
-						responseSize += sizeof(int); // length of function name
-						responseSize += name.length(); // name
-						responseSize += sizeof(int); // argsarray size
-						responseSize += param_count * sizeof(int);
-						for (int index = 0; index < param_count; ++index) { 
-							int variableType = (tempArgsArray[index] >> 16) & 255;
-							int variableLength = tempArgsArray[index] & 65535;
-							cout << "got in for loop" << endl;
-							if (variableLength == 0) { 
-								variableLength = 1;
-							}
-							if (variableType == 1) {
-								responseSize += sizeof(char)*variableLength;
-							}
-							if (variableType == 2) { 
-								responseSize += sizeof(short)*variableLength;
-							}
-							if (variableType == 3) { 
-								cout << "int is here " << endl;
-								responseSize += sizeof(int)*variableLength;
-							}
-							if (variableType == 4) { 
-								responseSize += sizeof(long)*variableLength;
-							}
-							if (variableType == 5) { 
-								responseSize += sizeof(double)*variableLength;
-							}
-							if (variableType == 6) { 
-								responseSize += sizeof(float)*variableLength;
-							}
-						}
-						char responseBuffer[responseSize];
-						cout << "responseSize " << responseSize << endl;
 						
-						// writing rpc call
-						char call_type = RPC_EXECUTE;
-						memcpy(responseBuffer+responseCounter, &call_type, sizeof(char));
-						responseCounter += sizeof(char);
-						
-						// writting namelength
-						int nameLength = name.length();
-						char int_arr[4];
-						intToArr(nameLength, int_arr);
-						memcpy(responseBuffer+responseCounter, int_arr, 4);
-						responseCounter += sizeof(4);
-						
-
-						// writing name
-						memcpy(responseBuffer+responseCounter, name.c_str(), name.length());
-						responseCounter += nameLength;
-
-						// writing arg size
-						intToArr(param_count, int_arr);
-						memcpy(responseBuffer+responseCounter, int_arr, 4);
-						responseCounter += sizeof(4);
-				
-						// writing args
-						for (int x = 0; x < param_count; x++) { 
-							intToArr(tempArgsArray[x], int_arr);
-							memcpy(responseBuffer+responseCounter, int_arr, 4);
-							responseCounter += sizeof(4);
-						}
-						
-						int argsIndex = 0;
-						int size = 0;
-						while (tempArgsArray[argsIndex]) {
-							cout << "tempArgs1 " << responseCounter << endl; 
-							int variableType = (tempArgsArray[argsIndex] >> 16) & 255;
-					                int variableLength = tempArgsArray[argsIndex] & 65535;
-              						if (variableLength == 0) {
-                        					variableLength = 1;
-                					}
-                					if (variableType == 1) {
-                        					size = sizeof(char)*variableLength;
-                					}
-                					if (variableType == 2) {
-                        					size = sizeof(short)*variableLength;
-                					}
-                					if (variableType == 3) {
-                        					size = sizeof(int)*variableLength;
-                					}
-                					if (variableType == 4) {
-                        					size = sizeof(long)*variableLength;
-                					}
-                					if (variableType == 5) {
-                        					size = sizeof(double)*variableLength;
-                					}
-                					if (variableType == 6){
-                        					size = sizeof(float)*variableLength;
-                					}
-							int testValue = 0;
-							arrToInt(&testValue, (char*)(tempArgs[argsIndex]));
-							memcpy(responseBuffer+responseCounter, tempArgs[argsIndex], size);
-							argsIndex++;
-							responseCounter += size;
-							cout << "tempArgs " << responseCounter << endl;
-
-						}
-						int written = 0, result = 0;
-					        while(written < responseSize){
-                					result = write(i, responseBuffer+written, responseSize-written);
-                					if(result == -1){return result;}
-                					written += result;
-        					}
-
 					}
 					
 				}
