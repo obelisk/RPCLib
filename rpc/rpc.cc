@@ -188,7 +188,7 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	// Done with binder
 	if (VERBOSE_OUTPUT == 1) {
 		printf("Binder Responsed with Host: %s, Port: %d\n", hostname, portNumber);
-		printf("Closing Connection To Binder.");
+		printf("Closing Connection To Binder.\n");
 	}
 	close(bindDescriptor);
 	//}
@@ -539,15 +539,13 @@ int rpcExecute() {
 						}
 						arrToInt(&param_count, len_buffer);
 						param_t *params = (param_t *)malloc(sizeof(param_t) * param_count);
-						cout << "param count " << param_count << endl;
+						if(VERBOSE_OUTPUT == 1){
+							printf("We have %d params for this function.\n", param_count);
+						}
 						int bad = 0;
-						int param;
-						int totalLength = 0;
+						int param = 0;
 						int paramSize[param_count];
 						int tempArgsArray[param_count];
-						vector<int> outputIndexs;
-						vector<int> outputSize;
-						vector<char> outputType;
 						for (int x = 0; x < param_count; ++x) {
 							if (readNBytes(i, 4, len_buffer) == -1) {
 								printf("Failed reading from server\n");
@@ -569,40 +567,39 @@ int rpcExecute() {
 							int paramLength = 0;
 							switch (params[x].type) {
 							case ARG_CHAR:
-								paramLength = sizeof(char) * tempLength;
+								paramLength = sizeof(char) 		* tempLength;
+								break;
 							case ARG_SHORT:
-								paramLength = sizeof(short) * tempLength;
+								paramLength = sizeof(short) 	* tempLength;
+								break;
 							case ARG_INT:
-								paramLength = sizeof(int) * tempLength;
+								paramLength = sizeof(int) 		* tempLength;
+								break;
 							case ARG_LONG:
-								paramLength = sizeof(long) * tempLength;
+								paramLength = sizeof(long) 		* tempLength;
+								break;
 							case ARG_DOUBLE:
-								paramLength = sizeof(double) * tempLength;
+								paramLength = sizeof(double) 	* tempLength;
+								break;
 							case ARG_FLOAT:
-								paramLength = sizeof(float) * tempLength;
+								paramLength = sizeof(float) 	* tempLength;
+								break;
 							}
-							if (params[x].output > 0) {
-								outputIndexs.push_back(x);
-								outputSize.push_back(paramLength);
-								outputType.push_back(params[x].type);
-							}
-							totalLength += 4;
 							paramSize[x] = paramLength;
+						}
+						for(int i=0; i< param_count; ++i){
+							printf("Param Size of %d is %d\n", i, paramSize[i]);
 						}
 						if (bad == 1) {
 							printf("Cleaning up after failed read\n");
 							free(params);
 							break;
 						}
-
 						if(VERBOSE_OUTPUT == 1){
 							printf("The Function Being Accessed in Map is: %s\n", mapKey.c_str());
 						}
 
 						void *tempArgs[param_count];
-
-						//	int responseSize = 0;
-						//	int responseCounter = 0;
 						for (int x = 0; x < param_count; x++) {
 							char *temp_buffer = (char *)malloc(paramSize[x]);
 							tempArgs[x] = (void *)temp_buffer;
@@ -610,6 +607,11 @@ int rpcExecute() {
 								close(i);
 								FD_CLR(i, &master);
 							}
+							//if(x == 3){
+							//	int testInt = 0;
+							//	memcpy(&testInt, temp_buffer, sizeof(int));
+							//	printf("Our int value is: %d\n", testInt);
+							//}
 						}
 						skeleton newf = myMap.find(mapKey)->second;
 						int skeletonResult = newf(tempArgsArray, tempArgs);
