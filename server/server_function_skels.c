@@ -5,6 +5,7 @@
 int f0_Skel(int *argTypes, void **args) {
 
   *(int *)args[0] = f0(*(int *)args[1], *(int *)args[2]);
+  printf("Params %d, %d\n", *(int *)args[1], *(int *)args[2]);
   return 0;
 }
 

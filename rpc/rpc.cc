@@ -197,7 +197,7 @@ int rpcCall(char* name, int* argTypes, void** args){
 	while (argTypes[index]) { 
 		int variableType = (argTypes[index] >> 16) & 255;
 		int variableLength = argTypes[index] & 65535;
-		cout << "VTYPE " << variableType << endl;
+	//	cout << "VTYPE " << variableType << endl;
 		if (variableLength == 0) { 
 			variableLength = 1;
 		}
@@ -222,7 +222,7 @@ int rpcCall(char* name, int* argTypes, void** args){
 		index++;
 	}
 	char callBuffer[callMsgSize];
-	cout << "callMSgSize " << callMsgSize << endl;	
+	//cout << "callMSgSize " << callMsgSize << endl;	
 	// writing rpc call
 	counter = 0;
 	memcpy(callBuffer+counter, &call_type, sizeof(char));
@@ -241,7 +241,7 @@ int rpcCall(char* name, int* argTypes, void** args){
 
 	// writting arg size
 	intToArr(argSize, int_arr2);
-	cout << "client argsize " << argSize << endl;
+	//cout << "client argsize " << argSize << endl;
 	memcpy(callBuffer+counter, int_arr2, 4);
 	counter += sizeof(4);
 
@@ -250,16 +250,15 @@ int rpcCall(char* name, int* argTypes, void** args){
 		intToArr(argTypes[i], int_arr2);
 		memcpy(callBuffer+counter, int_arr2, 4);
 		counter += sizeof(4);
-		cout << "shit " << counter << endl;
+	//	cout << "shit " << counter << endl;
 	}
 	int argsIndex = 0;
 	int size = 0;
 	while (argTypes[argsIndex]) {
-		cout << "argsIndex1 " << counter << endl;
+	//	cout << "argsIndex1 " << counter << endl;
                 int variableType = (argTypes[argsIndex] >> 16) & 255;
                 int variableLength = argTypes[argsIndex] & 65535;
 	//	int size = 0;
-		cout << "VTYPE " << variableType << endl;		
 		if (variableLength == 0) { 
 			variableLength = 1;
 		}
@@ -283,20 +282,14 @@ int rpcCall(char* name, int* argTypes, void** args){
                 }
 		int testValue = 0;
 		arrToInt(&testValue, (char*)(args[argsIndex]));
-		cout << "testValue " << testValue << endl;
 		memcpy(callBuffer+counter, args[argsIndex], size);
 		argsIndex++;
 		counter += size;
-		cout << "argsIndex " << counter << endl;
         }
 	written = 0, result = 0;
 	while (written < callMsgSize) {
-		cout << "sent " << endl;
 		result = write(s, callBuffer+written, callMsgSize-written);
-		cout << "result " << result << endl;
-		cout << "server " << s << endl;
 		if (result == -1) {
-			cout << "shit " << endl; 
 			return result;
 		}
 		written += result;
@@ -308,7 +301,6 @@ int rpcCall(char* name, int* argTypes, void** args){
 	int param_count = 0;
 	char* f_data;
 	if (rpcEXEC == RPC_EXECUTE) {
-		cout << "got here" << endl; 
 		if(readNBytes(s, 4, len_buffer) == -1) { 
 			close(s);
 		//	FD_CLR(s, &master);
@@ -375,13 +367,12 @@ int rpcCall(char* name, int* argTypes, void** args){
 		}	
 //		void * tempArgs[param_count];
 		for (int x =  0; x < param_count; x++) { 
-			//char *temp_buffer = (char*)malloc(paramSize[x]);
-		//	args[x] = (void *) temp_buffer;
-		//	if (readNBytes(s, paramSize[x], temp_buffer) == -1) { 
-		//		close(s);
-		//	}
-			cout << paramSize[x] << endl;
-//			memcpy(args[x], temp_buffer, paramSize[x]);
+			char temp_buffer[paramSize[x]];
+			if (readNBytes(s, paramSize[x], temp_buffer) == -1) { 
+				close(s);
+			}
+		//	cout << paramSize[x] << endl;
+			memcpy(args[x], temp_buffer, paramSize[x]);
 		}	
 		
 		
@@ -407,7 +398,6 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
 		argSize++;
 	}
 	myMap[str] = f;
-	cout << "map key is here " << str << endl;	
 
 	//The size of int thing is nice, but everything
 	//will break if it's ever not 4. This is because
@@ -429,7 +419,6 @@ int rpcRegister(char* name, int* argTypes, skeleton f){
     socklen_t addrlen = sizeof(sin);
     getsockname(serverDescriptor, (struct sockaddr *)&sin, &addrlen);
 	intToArr(ntohs(sin.sin_port), int_arr);
-	cout << "LISTENING PORT IS " << ntohs(sin.sin_port) << endl;
     memcpy(buffer+counter, int_arr, sizeof(int));
 	counter += sizeof(int);
 
@@ -498,10 +487,8 @@ int rpcExecute(){
 					}
 				}
 				else { 
-					cout << "Reading " << endl;
 					char call;
 					int result = readNBytes(i, 1, &call);
-					cout << "got rpc call " << endl;
 					if (result == -1) { 
 						close(i);
 						FD_CLR(i, &master);
@@ -514,28 +501,21 @@ int rpcExecute(){
 					int length = 0;
 					int param_count = 0;
 					if (call == RPC_CALL) { 
-						cout << "got rpc call " << endl;
 						if (readNBytes(i, 4, len_buffer) == -1) {
-							cout << "shit " << endl; 
 							close(i);
 							FD_CLR(i, &master);
 							break;
 						}
-						cout << "got length" << endl;	
 						arrToInt(&length, len_buffer);
-						cout << "copied length correctly " << length << endl;
 						f_data = (char*)malloc((length+1) * sizeof(char));
 						f_data[length] = '\0';
 						result = readNBytes(i, length, f_data);
-						cout << "result " << result << endl;
 						if (result == -1) { 
 							free(f_data);
 							break;
 						}
-						cout << "got name" << endl;
 						name = string(f_data, length);
 						mapKey = name;
-						cout << "function name " << name << endl;
 						free(f_data);
 						
 						if (readNBytes(i, 4, len_buffer) == -1) {
@@ -616,10 +596,13 @@ int rpcExecute(){
 								close(i);
 								FD_CLR(i, &master);
 							}
+							
 						}
 						skeleton newf = myMap.find(mapKey)->second;
 						int skeletonResult = newf(tempArgsArray, tempArgs);
 						cout << "skeletonResult " << skeletonResult << endl;
+						long out = *(long*)tempArgs;
+						cout << "Long dong    " << out;
 						int responseSize = 0;
 						int responseCounter = 0;
 						responseSize += sizeof(char); // rpc call

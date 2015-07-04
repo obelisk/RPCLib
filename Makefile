@@ -5,7 +5,7 @@ clean:
 
 library:
 	-rm -rf build/*.a
-	g++ -Iinclude -Wall -g -c rpc/rpc.cc -o build/librpc.o
+	g++ -Iinclude -std=c++0x -Wall -g -c rpc/rpc.cc -o build/librpc.o
 	g++ -Iinclude -Wall -g -c rpc/util.cc -o build/util.o
 	ar rcs build/librpc.a build/librpc.o build/util.o
 	rm build/*.o
