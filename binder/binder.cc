@@ -28,35 +28,80 @@ int bindAndListen(struct sockaddr_in ssock_s) {
 	return ssock;
 }
 
-int findFunction(func_def_t new_function) {
-	for (int i = 0; i < function_database.size(); ++i) {
-		if (new_function.param_count != function_database[i].param_count) {
-			continue;
-		}
-		if (new_function.name != function_database[i].name) {
-			continue;
-		}
-		param_t *new_params = new_function.params;
-		param_t *check_params = function_database[i].params;
+int functionsEqual(func_def_t f1, func_def_t f2){
+	if (f1.param_count != f2.param_count) {
+		return 0;
+	}
+	if (f1.name != f2.name) {
+		return 0;
+	}
+	param_t *new_params = f1.params;
+	param_t *check_params = f2.params;
 
-		// Already checked for the same length
-		for (int j = 0; j < new_function.param_count; ++j) {
-			if (new_params[j].input != check_params[j].input) {
-				break;
-			}
-			if (new_params[j].output != check_params[j].output) {
-				break;
-			}
-			if (new_params[j].type != check_params[j].type) {
-				break;
-			}
-			if (new_params[j].length != check_params[j].length) {
-				break;
-			}
-			return i;
+	// Already checked for the same length
+	for (int j = 0; j < f1.param_count; ++j) {
+		if (new_params[j].input != check_params[j].input) {
+			return 0;
+		}
+		if (new_params[j].output != check_params[j].output) {
+			return 0;
+		}
+		if (new_params[j].type != check_params[j].type) {
+			return 0;
+		}
+		if (new_params[j].length != check_params[j].length) {
+			return 0;
 		}
 	}
-	return NO_FUNCTION;
+	return 1;
+}
+
+int doesServerHave(std::vector<func_def_t> supported_functions, func_def_t new_function){
+	for (std::vector<func_def_t>::iterator i = supported_functions.begin(); i != supported_functions.end(); ++i){
+		if(functionsEqual(*i, new_function) == 1){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int addFunction(std::string server, int port, func_def_t new_function) {
+	for (std::deque<server_data_t>::iterator i = server_list.begin(); i != server_list.end(); ++i){
+		// This is the same server
+		if(i->server == server && i->port == port){
+			if(doesServerHave(i->supported_functions, new_function) == 1){
+				return RE_REGISTER;
+			}
+			i->supported_functions.push_back(new_function);
+			return NEW_FUNCTION;
+		}	
+	}
+	//	There is no server
+	server_data_t new_server;
+	new_server.server = server;
+	new_server.port = port;
+	new_server.supported_functions.push_back(new_function);
+	server_list.push_back(new_server);
+	return NEW_SERVER;
+}
+
+server_t findFunction(func_def_t new_function){
+	for (std::deque<server_data_t>::iterator i = server_list.begin(); i != server_list.end(); ++i){
+		if(doesServerHave(i->supported_functions, new_function) == 1){
+			server_data_t move = *i;
+			server_list.erase(i);
+			server_list.push_back(move);
+
+			server_t server;
+			server.server = move.server;
+			server.port = move.port;
+			return server;
+		}
+	}
+	server_t server;
+	server.server = std::string("");
+	server.port = 0;
+	return server;
 }
 
 int main(int argc, char **argv) {
@@ -138,7 +183,6 @@ int main(int argc, char **argv) {
 							break;
 						}
 						arrToInt(&server_port, len_buffer);
-						printf("Server Gave Port: %d\n", server_port);
 
 						// Read Length of Name
 						if (readNBytes(des, 4, len_buffer) == -1) {
@@ -216,25 +260,17 @@ int main(int argc, char **argv) {
 							printf("\tServer:\t%s\n", ip.c_str());
 							printf("\tPort:\t%d\n", server_port);
 						}
-						int have_function = findFunction(new_function);
+						int have_function = addFunction(ip, server_port, new_function);
 
-						server_t new_location;
-						new_location.server = ip;
-						new_location.port = server_port;
-
-						if (have_function == NO_FUNCTION) {
-							if (VERBOSE_OUTPUT == 1) {
-								printf("\tThis is a new function, adding to database\n");
+						if(VERBOSE_OUTPUT == 1){
+							if(have_function == NEW_SERVER){
+								printf("\tStatus: Added a new function to a new server.\n\n");
+							}else if(have_function == NEW_FUNCTION){
+								printf("\tStatus: Added a new function to an old server.\n\n");
+							}else if(have_function == RE_REGISTER){
+								printf("\tStatus: Server already has this function.\n\n");
 							}
-							new_function.servers.push_back(new_location);
-							function_database.push_back(new_function);
-						} else {
-							if (VERBOSE_OUTPUT == 1) {
-								printf("\tThis is an already existing function, adding to server array\n");
-							}
-							function_database[have_function].servers.push_back(new_location);
 						}
-
 					} else if (call_type == RPC_CALL) {
 						// Read Length of Name
 						if (readNBytes(des, 4, len_buffer) == -1) {
@@ -285,15 +321,12 @@ int main(int argc, char **argv) {
 						new_function.param_count = param_count;
 						new_function.params = params;
 
-						int have_function = findFunction(new_function);
+						server_t server = findFunction(new_function);
 
-						if (have_function == NO_FUNCTION) {
+						if (server.port == 0x0) {
 							unsigned char message_type = RPC_FAILURE;
 							write(des, &message_type, 1);
 						} else {
-							server_t server = function_database[have_function].servers.front();
-							function_database[have_function].servers.pop_front();
-							function_database[have_function].servers.push_back(server);
 							if (VERBOSE_OUTPUT == 1) {
 								printf("Client Asked for Function, Gave Server: %s, Port: %d\n", server.server.c_str(),
 									   server.port);
@@ -308,6 +341,8 @@ int main(int argc, char **argv) {
 							intToArr(server.port, int_arr);
 							write(des, &int_arr, 4);
 						}
+					} else if (call_type == RPC_TERMINATE){
+
 					}
 				}
 			}

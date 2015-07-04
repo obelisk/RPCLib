@@ -17,5 +17,16 @@
 // Local Headers
 #include "util.h"
 
-// Maps functions to server locations
-std::vector<func_def_t> function_database;
+#define NEW_SERVER 		0x1
+#define NEW_FUNCTION 	0x2
+#define RE_REGISTER		0x3
+#define NO_FUNCTION		0x4
+
+typedef struct {
+	std::vector<func_def_t> supported_functions;
+	std::string server;
+	int port;
+} server_data_t;
+
+// Server lookup list
+std::deque<server_data_t> server_list;
