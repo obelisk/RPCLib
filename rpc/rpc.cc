@@ -27,7 +27,34 @@ int bindDescriptor;
 int serverDescriptor;
 int serverPort;
 map<string, skeleton> myMap;
+int switchHelper(int variableType, int variableLength) {
+	int size = 0; 
+//	cout << "got in 3 " << variableType << endl;
+        switch (variableType) {
+//		cout << "got in 2 " << endl;
+		case ARG_CHAR:
+			size = sizeof(char) * variableLength;
+			break;
+		case ARG_SHORT:
+			size = sizeof(short) * variableLength;
+			break;
+		case ARG_INT:
+//			cout << "got in " << endl;
+			size = sizeof(int) * variableLength;
+			break;
+		case ARG_LONG:
+			size = sizeof(long) * variableLength;
+			break;
+		case ARG_DOUBLE:
+			size = sizeof(double) * variableLength;
+			break;
+		case ARG_FLOAT:
+			size = sizeof(float) * variableLength;
+			break;
+      	}
+	return size;
 
+}
 int setupListener() {
 	int s = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in sAddr;
@@ -218,30 +245,16 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	callMsgSize += argSize2 * sizeof(int);
 
 	int index = 0;
+
 	while (argTypes[index]) {
 		int variableType = (argTypes[index] >> 16) & 255;
-		int variableLength = argTypes[index] & 65535;
-		if (variableLength == 0) {
-			variableLength = 1;
-		}
-		if (variableType == 1) {
-			callMsgSize += sizeof(char) * variableLength;
-		}
-		if (variableType == 2) {
-			callMsgSize += sizeof(short) * variableLength;
-		}
-		if (variableType == 3) {
-			callMsgSize += sizeof(int) * variableLength;
-		}
-		if (variableType == 4) {
-			callMsgSize += sizeof(long) * variableLength;
-		}
-		if (variableType == 5) {
-			callMsgSize += sizeof(double) * variableLength;
-		}
-		if (variableType == 6) {
-			callMsgSize += sizeof(float) * variableLength;
-		}
+                int variableLength = argTypes[index] & 65535;
+                if (variableLength == 0) {
+                        variableLength = 1;
+                }
+
+		callMsgSize += switchHelper(variableType,variableLength);
+		cout << "callMsg Size " << callMsgSize << endl;
 		index++;
 	}
 	char callBuffer[callMsgSize];
@@ -274,36 +287,20 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	}
 	int argsIndex = 0;
 	int size = 0;
+	
 	while (argTypes[argsIndex]) {
-		int variableType = (argTypes[argsIndex] >> 16) & 255;
-		int variableLength = argTypes[argsIndex] & 65535;
-		if (variableLength == 0) {
-			variableLength = 1;
-		}
-		if (variableType == 1) {
-			size = sizeof(char) * variableLength;
-		}
-		if (variableType == 2) {
-			size = sizeof(short) * variableLength;
-		}
-		if (variableType == 3) {
-			size = sizeof(int) * variableLength;
-			int testValue = 0;
-			memcpy(&testValue, args[argsIndex], sizeof(int));
-		}
-		if (variableType == 4) {
-			size = sizeof(long) * variableLength;
-		}
-		if (variableType == 5) {
-			size = sizeof(double) * variableLength;
-		}
-		if (variableType == 6) {
-			size = sizeof(float) * variableLength;
-		}
-		memcpy(callBuffer + counter, args[argsIndex], size);
-		argsIndex++;
-		counter += size;
-	}
+                int variableType = (argTypes[argsIndex] >> 16) & 255;
+                int variableLength = argTypes[argsIndex] & 65535;
+                int size = 0;
+                if (variableLength == 0) {
+                        variableLength = 1;
+                }
+		size = switchHelper(variableType, variableLength);
+                memcpy(callBuffer+counter, args[argsIndex], size);
+                argsIndex++;
+                counter += size;
+        }
+
 	written = 0, result = 0;
 	while (written < callMsgSize) {
 		result = write(s, callBuffer + written, callMsgSize - written);
@@ -319,6 +316,9 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	int length = 0;
 	int param_count = 0;
 	char *f_data;
+	if (rpcEXEC == RPC_FAILURE){ 
+		return -1;
+	} 
 	if (rpcEXEC == RPC_EXECUTE) {
 		if (readNBytes(s, 4, len_buffer) == -1) {
 			close(s);
@@ -357,26 +357,7 @@ int rpcCall(char *name, int *argTypes, void **args) {
 				tempLength = params[x].length;
 			}
 			int paramLength = 0;
-			switch (params[x].type) {
-			case ARG_CHAR:
-				paramLength = sizeof(char) * tempLength;
-				break;
-			case ARG_SHORT:
-				paramLength = sizeof(short) * tempLength;
-				break;
-			case ARG_INT:
-				paramLength = sizeof(int) * tempLength;
-				break;
-			case ARG_LONG:
-				paramLength = sizeof(long) * tempLength;
-				break;
-			case ARG_DOUBLE:
-				paramLength = sizeof(double) * tempLength;
-				break;
-			case ARG_FLOAT:
-				paramLength = sizeof(float) * tempLength;
-				break;
-			}
+			paramLength = switchHelper(params[x].type, tempLength);
 			totalLength += 4;
 			paramSize[x] = paramLength;
 		}
@@ -396,6 +377,18 @@ int rpcCall(char *name, int *argTypes, void **args) {
 			memcpy(args[x], temp_buffer, paramSize[x]);
 		}
 	}
+	clientInit();
+	char terminate = RPC_TERMINATE;
+	written = 0, result = 0;
+        while (written < 1) {
+                int result = write(bindDescriptor, &terminate, 1);
+                if (result == -1) {
+                        printf("Failed writing to binder\n");
+                        return result;
+                }
+                written += result;
+        }
+
 	return 0;
 }
 
@@ -491,7 +484,7 @@ int rpcExecute() {
 				if (i == serverDescriptor) {
 					int newfd = accept(serverDescriptor, (struct sockaddr *)&csock_s, (socklen_t *)&len);
 					if (VERBOSE_OUTPUT == 1) {
-						printf("New Connection on Descriptor: %d\n",serverDescriptor);
+						cout << "new connection s is " << serverDescriptor << endl;
 					}
 					if (newfd == -1) {
 					}
@@ -565,26 +558,7 @@ int rpcExecute() {
 								tempLength = params[x].length;
 							}
 							int paramLength = 0;
-							switch (params[x].type) {
-								case ARG_CHAR:
-									paramLength = sizeof(char) * tempLength;
-									break;
-								case ARG_SHORT:
-									paramLength = sizeof(short) * tempLength;
-									break;
-								case ARG_INT:
-									paramLength = sizeof(int) * tempLength;
-									break;
-								case ARG_LONG:
-									paramLength = sizeof(long) * tempLength;
-									break;
-								case ARG_DOUBLE:
-									paramLength = sizeof(double) * tempLength;
-									break;
-								case ARG_FLOAT:
-									paramLength = sizeof(float) * tempLength;
-									break;
-							}
+							paramLength = switchHelper(params[x].type, tempLength);
 							paramSize[x] = paramLength;
 						}
 						for (int i = 0; i < param_count; ++i) {
@@ -623,6 +597,23 @@ int rpcExecute() {
 						int responseSize = 0;
 						int responseCounter = 0;
 						responseSize += sizeof(char);  // rpc call
+
+						if (skeletonResult < 0)  {
+							char responseBuffer[responseSize];
+							char call_type = RPC_FAILURE;
+							memcpy(responseBuffer+responseCounter, &call_type, sizeof(char));
+							int written = 0, result = 0;
+                                                	while (written < responseSize) {
+                                                        	result = write(i, responseBuffer + written, responseSize - written);
+                                                        	if (result == -1) {
+                                                         	       return result;
+                                                        	}
+                                                        	written += result;
+                                                	}
+
+							continue;
+						}
+						
 						responseSize += sizeof(int);   // length of function name
 						responseSize += name.length(); // name
 						responseSize += sizeof(int);   // argsarray size
@@ -633,26 +624,7 @@ int rpcExecute() {
 							if (variableLength == 0) {
 								variableLength = 1;
 							}
-							switch (variableType) {
-								case ARG_CHAR:
-									responseSize += sizeof(char) * variableLength;
-									break;
-								case ARG_SHORT:
-									responseSize += sizeof(short) * variableLength;
-									break;
-								case ARG_INT:
-									responseSize += sizeof(int) * variableLength;
-									break;
-								case ARG_LONG:
-									responseSize += sizeof(long) * variableLength;
-									break;
-								case ARG_DOUBLE:
-									responseSize += sizeof(double) * variableLength;
-									break;
-								case ARG_FLOAT:
-									responseSize += sizeof(float) * variableLength;
-									break;
-							}
+							responseSize += switchHelper(variableType, variableLength);
 						}
 						char responseBuffer[responseSize];
 						if (VERBOSE_OUTPUT == 1) {
@@ -697,26 +669,7 @@ int rpcExecute() {
 							if (variableLength == 0) {
 								variableLength = 1;
 							}
-							switch (variableType) {
-								case ARG_CHAR:
-									size = sizeof(char) * variableLength;
-									break;
-								case ARG_SHORT:
-									size = sizeof(short) * variableLength;
-									break;
-								case ARG_INT:
-									size = sizeof(int) * variableLength;
-									break;
-								case ARG_LONG:
-									size = sizeof(long) * variableLength;
-									break;
-								case ARG_DOUBLE:
-									size = sizeof(double) * variableLength;
-									break;
-								case ARG_FLOAT:
-									size = sizeof(float) * variableLength;
-									break;
-							}
+							size = switchHelper(variableType, variableLength);
 							int testValue = 0;
 							arrToInt(&testValue, (char *)(tempArgs[argsIndex]));
 							memcpy(responseBuffer + responseCounter, tempArgs[argsIndex], size);
