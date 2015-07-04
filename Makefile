@@ -5,7 +5,7 @@ clean:
 
 library:
 	-rm -rf build/*.a
-	g++ -Iinclude -std=c++0x -Wall -g -c rpc/rpc.cc -o build/librpc.o
+	g++ -Iinclude -Wall -g -c rpc/rpc.cc -o build/librpc.o
 	g++ -Iinclude -Wall -g -c rpc/util.cc -o build/util.o
 	ar rcs build/librpc.a build/librpc.o build/util.o
 	rm build/*.o
@@ -22,3 +22,10 @@ binder: build/librpc.a
 	-rm build/binder
 	-rm -rf build/binder.dSYM
 	g++ -Iinclude -Wall -g -o build/binder binder/binder.cc build/librpc.a
+
+format:
+	clang-format -i rpc/rpc.cc
+	clang-format -i rpc/util.cc
+	clang-format -i include/util.h
+	clang-format -i binder/binder.cc
+	clang-format -i binder/binder.h
