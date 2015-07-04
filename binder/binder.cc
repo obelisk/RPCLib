@@ -28,6 +28,26 @@ int bindAndListen(struct sockaddr_in ssock_s) {
 	return ssock;
 }
 
+int connectToServer(std::string ip, int port) {
+	struct hostent *he;
+	struct sockaddr_in server;
+	int connection_des;
+
+	if ((he = gethostbyname(ip.c_str())) == NULL) {
+		return -1;
+	}
+
+	memcpy(&server.sin_addr, he->h_addr_list[0], he->h_length);
+	server.sin_family = AF_INET;
+	server.sin_port = htons(port);
+	connection_des = socket(AF_INET, SOCK_STREAM, 0);
+
+	if (connect(connection_des, (struct sockaddr *)&server, sizeof(server)) != 0) {
+		return -1;
+	}
+	return connection_des;
+}
+
 int functionsEqual(func_def_t f1, func_def_t f2) {
 	if (f1.param_count != f2.param_count) {
 		return 0;
@@ -106,7 +126,7 @@ server_t findFunction(func_def_t new_function) {
 
 int main(int argc, char **argv) {
 	// Variables
-	int port = 0, server_port = 0, error = 0, result = 0, first_decriptor = 0, length = 0, param_count = 0;
+	int port = 0, server_port = 0, error = 0, result = 0, shouldRun = 1, first_decriptor = 0, length = 0, param_count = 0;
 	char *hostname = (char *)malloc(255), *len_buffer = (char *)malloc(4);
 	char portStr[5];
 
@@ -147,7 +167,7 @@ int main(int argc, char **argv) {
 	}
 	sprintf(portStr, "%d", port);
 
-	while (1) {
+	while (shouldRun) {
 		fdread = fdactive;
 		if (select(FD_SETSIZE, &fdread, 0x0, 0x0, 0x0) < 0) {
 			printf("FD Error. Bummer.\n");
@@ -342,6 +362,16 @@ int main(int argc, char **argv) {
 							write(des, &int_arr, 4);
 						}
 					} else if (call_type == RPC_TERMINATE) {
+						if(VERBOSE_OUTPUT == 1){
+							printf("Received A Terminate Instruction.\n");
+						}
+						for (std::deque<server_data_t>::iterator i = server_list.begin(); i != server_list.end(); ++i) {
+							int connection = connectToServer(i->server, i->port);
+							char terminate = RPC_TERMINATE;
+							write(connection, &terminate, 1);
+							close(connection);
+							shouldRun = 0;
+						}
 					}
 				}
 			}

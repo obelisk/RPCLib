@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <sys/socket.h>
 #include <ctype.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
