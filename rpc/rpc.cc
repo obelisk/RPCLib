@@ -288,6 +288,10 @@ int rpcCall(char *name, int *argTypes, void **args) {
 		}
 		if (variableType == 3) {
 			size = sizeof(int) * variableLength;
+			cout << "b1 " << *(int*)args[argsIndex] << endl; 
+			int testValue = 0;
+			memcpy(&testValue, args[argsIndex], sizeof(int));
+			cout << "b2 " << testValue << endl;
 		}
 		if (variableType == 4) {
 			size = sizeof(long) * variableLength;
@@ -298,8 +302,6 @@ int rpcCall(char *name, int *argTypes, void **args) {
 		if (variableType == 6) {
 			size = sizeof(float) * variableLength;
 		}
-		int testValue = 0;
-		arrToInt(&testValue, (char *)(args[argsIndex]));
 		memcpy(callBuffer + counter, args[argsIndex], size);
 		argsIndex++;
 		counter += size;
@@ -384,6 +386,11 @@ int rpcCall(char *name, int *argTypes, void **args) {
 				close(s);
 				printf("Connection closed while reading param data from server\n");
 				return -1;
+			}
+			int test = 0;
+			memcpy(&test, temp_buffer, sizeof(int));
+			if (x == 3) { 
+				cout << "b3 " << test << endl; 
 			}
 			memcpy(args[x], temp_buffer, paramSize[x]);
 		}
