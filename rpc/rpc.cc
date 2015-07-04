@@ -658,7 +658,7 @@ int rpcExecute() {
 						memcpy(responseBuffer + responseCounter, &call_type, sizeof(char));
 						responseCounter += sizeof(char);
 
-						// writting namelength
+						// writting name length
 						int nameLength = name.length();
 						char int_arr[4];
 						intToArr(nameLength, int_arr);
@@ -681,9 +681,8 @@ int rpcExecute() {
 							responseCounter += sizeof(4);
 						}
 
-						int argsIndex = 0;
 						int size = 0;
-						while (tempArgsArray[argsIndex]) {
+						for (int argsIndex = 0; argsIndex < param_count; ++argsIndex) {
 							cout << "tempArgs1 " << responseCounter << endl;
 							int variableType = (tempArgsArray[argsIndex] >> 16) & 255;
 							int variableLength = tempArgsArray[argsIndex] & 65535;
@@ -711,7 +710,6 @@ int rpcExecute() {
 							int testValue = 0;
 							arrToInt(&testValue, (char *)(tempArgs[argsIndex]));
 							memcpy(responseBuffer + responseCounter, tempArgs[argsIndex], size);
-							argsIndex++;
 							responseCounter += size;
 							cout << "tempArgs " << responseCounter << endl;
 						}
