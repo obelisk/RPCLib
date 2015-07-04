@@ -8,5 +8,3 @@
 
 #define INPUT_BIT 	0x80000000
 #define OUTPUT_BIT 	0x40000000
-
-#define NO_FUNCTION -1

@@ -28,7 +28,7 @@ int bindAndListen(struct sockaddr_in ssock_s) {
 	return ssock;
 }
 
-int functionsEqual(func_def_t f1, func_def_t f2){
+int functionsEqual(func_def_t f1, func_def_t f2) {
 	if (f1.param_count != f2.param_count) {
 		return 0;
 	}
@@ -56,9 +56,9 @@ int functionsEqual(func_def_t f1, func_def_t f2){
 	return 1;
 }
 
-int doesServerHave(std::vector<func_def_t> supported_functions, func_def_t new_function){
-	for (std::vector<func_def_t>::iterator i = supported_functions.begin(); i != supported_functions.end(); ++i){
-		if(functionsEqual(*i, new_function) == 1){
+int doesServerHave(std::vector<func_def_t> supported_functions, func_def_t new_function) {
+	for (std::vector<func_def_t>::iterator i = supported_functions.begin(); i != supported_functions.end(); ++i) {
+		if (functionsEqual(*i, new_function) == 1) {
 			return 1;
 		}
 	}
@@ -66,15 +66,15 @@ int doesServerHave(std::vector<func_def_t> supported_functions, func_def_t new_f
 }
 
 int addFunction(std::string server, int port, func_def_t new_function) {
-	for (std::deque<server_data_t>::iterator i = server_list.begin(); i != server_list.end(); ++i){
+	for (std::deque<server_data_t>::iterator i = server_list.begin(); i != server_list.end(); ++i) {
 		// This is the same server
-		if(i->server == server && i->port == port){
-			if(doesServerHave(i->supported_functions, new_function) == 1){
+		if (i->server == server && i->port == port) {
+			if (doesServerHave(i->supported_functions, new_function) == 1) {
 				return RE_REGISTER;
 			}
 			i->supported_functions.push_back(new_function);
 			return NEW_FUNCTION;
-		}	
+		}
 	}
 	//	There is no server
 	server_data_t new_server;
@@ -85,9 +85,9 @@ int addFunction(std::string server, int port, func_def_t new_function) {
 	return NEW_SERVER;
 }
 
-server_t findFunction(func_def_t new_function){
-	for (std::deque<server_data_t>::iterator i = server_list.begin(); i != server_list.end(); ++i){
-		if(doesServerHave(i->supported_functions, new_function) == 1){
+server_t findFunction(func_def_t new_function) {
+	for (std::deque<server_data_t>::iterator i = server_list.begin(); i != server_list.end(); ++i) {
+		if (doesServerHave(i->supported_functions, new_function) == 1) {
 			server_data_t move = *i;
 			server_list.erase(i);
 			server_list.push_back(move);
@@ -262,12 +262,12 @@ int main(int argc, char **argv) {
 						}
 						int have_function = addFunction(ip, server_port, new_function);
 
-						if(VERBOSE_OUTPUT == 1){
-							if(have_function == NEW_SERVER){
+						if (VERBOSE_OUTPUT == 1) {
+							if (have_function == NEW_SERVER) {
 								printf("\tStatus: Added a new function to a new server.\n\n");
-							}else if(have_function == NEW_FUNCTION){
+							} else if (have_function == NEW_FUNCTION) {
 								printf("\tStatus: Added a new function to an old server.\n\n");
-							}else if(have_function == RE_REGISTER){
+							} else if (have_function == RE_REGISTER) {
 								printf("\tStatus: Server already has this function.\n\n");
 							}
 						}
@@ -341,8 +341,7 @@ int main(int argc, char **argv) {
 							intToArr(server.port, int_arr);
 							write(des, &int_arr, 4);
 						}
-					} else if (call_type == RPC_TERMINATE){
-
+					} else if (call_type == RPC_TERMINATE) {
 					}
 				}
 			}

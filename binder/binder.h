@@ -17,10 +17,10 @@
 // Local Headers
 #include "util.h"
 
-#define NEW_SERVER 		0x1
-#define NEW_FUNCTION 	0x2
-#define RE_REGISTER		0x3
-#define NO_FUNCTION		0x4
+#define NEW_SERVER 0x1
+#define NEW_FUNCTION 0x2
+#define RE_REGISTER 0x3
+#define NO_FUNCTION 0x4
 
 typedef struct {
 	std::vector<func_def_t> supported_functions;

@@ -28,32 +28,31 @@ int serverDescriptor;
 int serverPort;
 map<string, skeleton> myMap;
 int switchHelper(int variableType, int variableLength) {
-	int size = 0; 
-//	cout << "got in 3 " << variableType << endl;
-        switch (variableType) {
-//		cout << "got in 2 " << endl;
-		case ARG_CHAR:
-			size = sizeof(char) * variableLength;
-			break;
-		case ARG_SHORT:
-			size = sizeof(short) * variableLength;
-			break;
-		case ARG_INT:
-//			cout << "got in " << endl;
-			size = sizeof(int) * variableLength;
-			break;
-		case ARG_LONG:
-			size = sizeof(long) * variableLength;
-			break;
-		case ARG_DOUBLE:
-			size = sizeof(double) * variableLength;
-			break;
-		case ARG_FLOAT:
-			size = sizeof(float) * variableLength;
-			break;
-      	}
+	int size = 0;
+	//	cout << "got in 3 " << variableType << endl;
+	switch (variableType) {
+	//		cout << "got in 2 " << endl;
+	case ARG_CHAR:
+		size = sizeof(char) * variableLength;
+		break;
+	case ARG_SHORT:
+		size = sizeof(short) * variableLength;
+		break;
+	case ARG_INT:
+		//			cout << "got in " << endl;
+		size = sizeof(int) * variableLength;
+		break;
+	case ARG_LONG:
+		size = sizeof(long) * variableLength;
+		break;
+	case ARG_DOUBLE:
+		size = sizeof(double) * variableLength;
+		break;
+	case ARG_FLOAT:
+		size = sizeof(float) * variableLength;
+		break;
+	}
 	return size;
-
 }
 int setupListener() {
 	int s = socket(AF_INET, SOCK_STREAM, 0);
@@ -97,7 +96,6 @@ int connectBinder() {
 	if (connect(bindDescriptor, (struct sockaddr *)&server, sizeof(server)) != 0) {
 		return -1;
 	}
-	printf("bindDescriptor: %d\n", bindDescriptor);
 	return 0;
 }
 int clientInit() {
@@ -202,7 +200,6 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	char *hostname;
 	char port[4];
 	int portNumber = 0;
-	// if (call == RPC_CALL) {
 	result2 = readNBytes(bindDescriptor, 4, hostnameLength);
 	int hlength;
 	arrToInt(&hlength, hostnameLength);
@@ -212,13 +209,11 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	result2 = readNBytes(bindDescriptor, hlength, hostname);
 	result2 = readNBytes(bindDescriptor, 4, port);
 	arrToInt(&portNumber, port);
-	// Done with binder
 	if (VERBOSE_OUTPUT == 1) {
 		printf("Binder Responsed with Host: %s, Port: %d\n", hostname, portNumber);
 		printf("Closing Connection To Binder.\n");
 	}
 	close(bindDescriptor);
-	//}
 
 	int s = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in sAddr;
@@ -248,13 +243,12 @@ int rpcCall(char *name, int *argTypes, void **args) {
 
 	while (argTypes[index]) {
 		int variableType = (argTypes[index] >> 16) & 255;
-                int variableLength = argTypes[index] & 65535;
-                if (variableLength == 0) {
-                        variableLength = 1;
-                }
+		int variableLength = argTypes[index] & 65535;
+		if (variableLength == 0) {
+			variableLength = 1;
+		}
 
-		callMsgSize += switchHelper(variableType,variableLength);
-		cout << "callMsg Size " << callMsgSize << endl;
+		callMsgSize += switchHelper(variableType, variableLength);
 		index++;
 	}
 	char callBuffer[callMsgSize];
@@ -287,19 +281,19 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	}
 	int argsIndex = 0;
 	int size = 0;
-	
+
 	while (argTypes[argsIndex]) {
-                int variableType = (argTypes[argsIndex] >> 16) & 255;
-                int variableLength = argTypes[argsIndex] & 65535;
-                int size = 0;
-                if (variableLength == 0) {
-                        variableLength = 1;
-                }
+		int variableType = (argTypes[argsIndex] >> 16) & 255;
+		int variableLength = argTypes[argsIndex] & 65535;
+		int size = 0;
+		if (variableLength == 0) {
+			variableLength = 1;
+		}
 		size = switchHelper(variableType, variableLength);
-                memcpy(callBuffer+counter, args[argsIndex], size);
-                argsIndex++;
-                counter += size;
-        }
+		memcpy(callBuffer + counter, args[argsIndex], size);
+		argsIndex++;
+		counter += size;
+	}
 
 	written = 0, result = 0;
 	while (written < callMsgSize) {
@@ -316,9 +310,9 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	int length = 0;
 	int param_count = 0;
 	char *f_data;
-	if (rpcEXEC == RPC_FAILURE){ 
+	if (rpcEXEC == RPC_FAILURE) {
 		return -1;
-	} 
+	}
 	if (rpcEXEC == RPC_EXECUTE) {
 		if (readNBytes(s, 4, len_buffer) == -1) {
 			close(s);
@@ -380,14 +374,14 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	clientInit();
 	char terminate = RPC_TERMINATE;
 	written = 0, result = 0;
-        while (written < 1) {
-                int result = write(bindDescriptor, &terminate, 1);
-                if (result == -1) {
-                        printf("Failed writing to binder\n");
-                        return result;
-                }
-                written += result;
-        }
+	while (written < 1) {
+		int result = write(bindDescriptor, &terminate, 1);
+		if (result == -1) {
+			printf("Failed writing to binder\n");
+			return result;
+		}
+		written += result;
+	}
 
 	return 0;
 }
@@ -561,9 +555,6 @@ int rpcExecute() {
 							paramLength = switchHelper(params[x].type, tempLength);
 							paramSize[x] = paramLength;
 						}
-						for (int i = 0; i < param_count; ++i) {
-							printf("Param Size of %d is %d\n", i, paramSize[i]);
-						}
 						if (bad == 1) {
 							printf("Cleaning up after failed read\n");
 							free(params);
@@ -596,24 +587,24 @@ int rpcExecute() {
 						}
 						int responseSize = 0;
 						int responseCounter = 0;
-						responseSize += sizeof(char);  // rpc call
+						responseSize += sizeof(char); // rpc call
 
-						if (skeletonResult < 0)  {
+						if (skeletonResult < 0) {
 							char responseBuffer[responseSize];
 							char call_type = RPC_FAILURE;
-							memcpy(responseBuffer+responseCounter, &call_type, sizeof(char));
+							memcpy(responseBuffer + responseCounter, &call_type, sizeof(char));
 							int written = 0, result = 0;
-                                                	while (written < responseSize) {
-                                                        	result = write(i, responseBuffer + written, responseSize - written);
-                                                        	if (result == -1) {
-                                                         	       return result;
-                                                        	}
-                                                        	written += result;
-                                                	}
+							while (written < responseSize) {
+								result = write(i, responseBuffer + written, responseSize - written);
+								if (result == -1) {
+									return result;
+								}
+								written += result;
+							}
 
 							continue;
 						}
-						
+
 						responseSize += sizeof(int);   // length of function name
 						responseSize += name.length(); // name
 						responseSize += sizeof(int);   // argsarray size
