@@ -36,18 +36,18 @@ int setupListener() {
 	sAddr.sin_port = 0;
 	int success;
 	success = bind(s, (struct sockaddr *)&sAddr, sizeof(sAddr));
-	if(success == -1){
+	if (success == -1) {
 		perror("Bind: ");
 		return -1;
 	}
 
 	socklen_t addrlen = sizeof(sAddr);
 	success = getsockname(s, (struct sockaddr *)&sAddr, &addrlen);
-	if(success == -1){
+	if (success == -1) {
 		perror("getsockname: ");
 		return -1;
 	}
-	if(VERBOSE_OUTPUT == 1){
+	if (VERBOSE_OUTPUT == 1) {
 		printf("Server is Waiting on Port: %d\n", ntohs(sAddr.sin_port));
 	}
 	serverPort = ntohs(sAddr.sin_port);
@@ -288,10 +288,8 @@ int rpcCall(char *name, int *argTypes, void **args) {
 		}
 		if (variableType == 3) {
 			size = sizeof(int) * variableLength;
-			cout << "b1 " << *(int*)args[argsIndex] << endl; 
 			int testValue = 0;
 			memcpy(&testValue, args[argsIndex], sizeof(int));
-			cout << "b2 " << testValue << endl;
 		}
 		if (variableType == 4) {
 			size = sizeof(long) * variableLength;
@@ -362,16 +360,22 @@ int rpcCall(char *name, int *argTypes, void **args) {
 			switch (params[x].type) {
 			case ARG_CHAR:
 				paramLength = sizeof(char) * tempLength;
+				break;
 			case ARG_SHORT:
 				paramLength = sizeof(short) * tempLength;
+				break;
 			case ARG_INT:
 				paramLength = sizeof(int) * tempLength;
+				break;
 			case ARG_LONG:
 				paramLength = sizeof(long) * tempLength;
+				break;
 			case ARG_DOUBLE:
 				paramLength = sizeof(double) * tempLength;
+				break;
 			case ARG_FLOAT:
 				paramLength = sizeof(float) * tempLength;
+				break;
 			}
 			totalLength += 4;
 			paramSize[x] = paramLength;
@@ -389,9 +393,6 @@ int rpcCall(char *name, int *argTypes, void **args) {
 			}
 			int test = 0;
 			memcpy(&test, temp_buffer, sizeof(int));
-			if (x == 3) { 
-				cout << "b3 " << test << endl; 
-			}
 			memcpy(args[x], temp_buffer, paramSize[x]);
 		}
 	}
@@ -470,7 +471,6 @@ int rpcRegister(char *name, int *argTypes, skeleton f) {
 }
 
 int rpcExecute() {
-	//	return 0;
 	listen(serverDescriptor, 5);
 	struct sockaddr_in csock_s;
 	socklen_t len = sizeof(csock_s);
@@ -539,7 +539,7 @@ int rpcExecute() {
 						}
 						arrToInt(&param_count, len_buffer);
 						param_t *params = (param_t *)malloc(sizeof(param_t) * param_count);
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("We have %d params for this function.\n", param_count);
 						}
 						int bad = 0;
@@ -566,28 +566,28 @@ int rpcExecute() {
 							}
 							int paramLength = 0;
 							switch (params[x].type) {
-							case ARG_CHAR:
-								paramLength = sizeof(char) 		* tempLength;
-								break;
-							case ARG_SHORT:
-								paramLength = sizeof(short) 	* tempLength;
-								break;
-							case ARG_INT:
-								paramLength = sizeof(int) 		* tempLength;
-								break;
-							case ARG_LONG:
-								paramLength = sizeof(long) 		* tempLength;
-								break;
-							case ARG_DOUBLE:
-								paramLength = sizeof(double) 	* tempLength;
-								break;
-							case ARG_FLOAT:
-								paramLength = sizeof(float) 	* tempLength;
-								break;
+								case ARG_CHAR:
+									paramLength = sizeof(char) * tempLength;
+									break;
+								case ARG_SHORT:
+									paramLength = sizeof(short) * tempLength;
+									break;
+								case ARG_INT:
+									paramLength = sizeof(int) * tempLength;
+									break;
+								case ARG_LONG:
+									paramLength = sizeof(long) * tempLength;
+									break;
+								case ARG_DOUBLE:
+									paramLength = sizeof(double) * tempLength;
+									break;
+								case ARG_FLOAT:
+									paramLength = sizeof(float) * tempLength;
+									break;
 							}
 							paramSize[x] = paramLength;
 						}
-						for(int i=0; i< param_count; ++i){
+						for (int i = 0; i < param_count; ++i) {
 							printf("Param Size of %d is %d\n", i, paramSize[i]);
 						}
 						if (bad == 1) {
@@ -595,7 +595,7 @@ int rpcExecute() {
 							free(params);
 							break;
 						}
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("The Function Being Accessed in Map is: %s\n", mapKey.c_str());
 						}
 
@@ -607,22 +607,17 @@ int rpcExecute() {
 								close(i);
 								FD_CLR(i, &master);
 							}
-							//if(x == 3){
-							//	int testInt = 0;
-							//	memcpy(&testInt, temp_buffer, sizeof(int));
-							//	printf("Our int value is: %d\n", testInt);
-							//}
 						}
 						skeleton newf = myMap.find(mapKey)->second;
 						int skeletonResult = newf(tempArgsArray, tempArgs);
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("The Skeleton Function returned: ");
-							switch(skeletonResult){
-								case 0:
-									printf("Successful\n");
-									break;
-								default:
-									printf("Failure\n");
+							switch (skeletonResult) {
+							case 0:
+								printf("Successful\n");
+								break;
+							default:
+								printf("Failure\n");
 							}
 						}
 						int responseSize = 0;
@@ -638,27 +633,29 @@ int rpcExecute() {
 							if (variableLength == 0) {
 								variableLength = 1;
 							}
-							if (variableType == 1) {
-								responseSize += sizeof(char) * variableLength;
-							}
-							if (variableType == 2) {
-								responseSize += sizeof(short) * variableLength;
-							}
-							if (variableType == 3) {
-								responseSize += sizeof(int) * variableLength;
-							}
-							if (variableType == 4) {
-								responseSize += sizeof(long) * variableLength;
-							}
-							if (variableType == 5) {
-								responseSize += sizeof(double) * variableLength;
-							}
-							if (variableType == 6) {
-								responseSize += sizeof(float) * variableLength;
+							switch (variableType) {
+								case ARG_CHAR:
+									responseSize += sizeof(char) * variableLength;
+									break;
+								case ARG_SHORT:
+									responseSize += sizeof(short) * variableLength;
+									break;
+								case ARG_INT:
+									responseSize += sizeof(int) * variableLength;
+									break;
+								case ARG_LONG:
+									responseSize += sizeof(long) * variableLength;
+									break;
+								case ARG_DOUBLE:
+									responseSize += sizeof(double) * variableLength;
+									break;
+								case ARG_FLOAT:
+									responseSize += sizeof(float) * variableLength;
+									break;
 							}
 						}
 						char responseBuffer[responseSize];
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("Our Response To The Client is %d bytes long\n", responseSize);
 						}
 
@@ -692,7 +689,7 @@ int rpcExecute() {
 
 						int size = 0;
 						for (int argsIndex = 0; argsIndex < param_count; ++argsIndex) {
-							if(VERBOSE_OUTPUT == 1){
+							if (VERBOSE_OUTPUT == 1) {
 								printf("Our Buffer Pointer is At: %d\n", responseCounter);
 							}
 							int variableType = (tempArgsArray[argsIndex] >> 16) & 255;
@@ -700,30 +697,32 @@ int rpcExecute() {
 							if (variableLength == 0) {
 								variableLength = 1;
 							}
-							if (variableType == 1) {
-								size = sizeof(char) * variableLength;
-							}
-							if (variableType == 2) {
-								size = sizeof(short) * variableLength;
-							}
-							if (variableType == 3) {
-								size = sizeof(int) * variableLength;
-							}
-							if (variableType == 4) {
-								size = sizeof(long) * variableLength;
-							}
-							if (variableType == 5) {
-								size = sizeof(double) * variableLength;
-							}
-							if (variableType == 6) {
-								size = sizeof(float) * variableLength;
+							switch (variableType) {
+								case ARG_CHAR:
+									size = sizeof(char) * variableLength;
+									break;
+								case ARG_SHORT:
+									size = sizeof(short) * variableLength;
+									break;
+								case ARG_INT:
+									size = sizeof(int) * variableLength;
+									break;
+								case ARG_LONG:
+									size = sizeof(long) * variableLength;
+									break;
+								case ARG_DOUBLE:
+									size = sizeof(double) * variableLength;
+									break;
+								case ARG_FLOAT:
+									size = sizeof(float) * variableLength;
+									break;
 							}
 							int testValue = 0;
 							arrToInt(&testValue, (char *)(tempArgs[argsIndex]));
 							memcpy(responseBuffer + responseCounter, tempArgs[argsIndex], size);
 							responseCounter += size;
 						}
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("Our Buffer Pointer Ended At: %d\n", responseCounter);
 						}
 						int written = 0, result = 0;
