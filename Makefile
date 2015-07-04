@@ -5,7 +5,7 @@ clean:
 
 library:
 	-rm -rf build/*.a
-	clang++ -std=c++11 -Iinclude -Wall -g -c rpc/rpc.cc -o build/librpc.o
+	clang++ -Iinclude -Wall -g -c rpc/rpc.cc -o build/librpc.o
 	clang++ -Iinclude -Wall -g -c rpc/util.cc -o build/util.o
 	ar rcs build/librpc.a build/librpc.o build/util.o
 	rm build/*.o
