@@ -491,7 +491,7 @@ int rpcExecute() {
 				if (i == serverDescriptor) {
 					int newfd = accept(serverDescriptor, (struct sockaddr *)&csock_s, (socklen_t *)&len);
 					if (VERBOSE_OUTPUT == 1) {
-						cout << "new connection s is " << serverDescriptor << endl;
+						printf("New Connection on Descriptor: %d\n",serverDescriptor);
 					}
 					if (newfd == -1) {
 					}

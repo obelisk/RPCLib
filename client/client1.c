@@ -88,7 +88,7 @@ int main(int argc, char ** argv) {
   args3[0] = (void *)a3;
 
   /* prepare the arguemtns for f4 */
-/*  char *a4 = "non_exist_file_to_be_printed";
+  char *a4 = "non_exist_file_to_be_printed";
   int count4 = 1;
   int argTypes4[count4 + 1];
   void **args4;
@@ -97,7 +97,7 @@ int main(int argc, char ** argv) {
   argTypes4[1] = 0;
 
   args4 = (void **)malloc(count4 * sizeof(void *));
-  args4[0] = (void *)a4;*/
+  args4[0] = (void *)a4;
 
   /* rpcCalls */
   int s0 = rpcCall("f0", argTypes0, args0);
@@ -122,7 +122,7 @@ int main(int argc, char ** argv) {
   }
 
 
-/*  int s2 = rpcCall("f2", argTypes2, args2);
+  int s2 = rpcCall("f2", argTypes2, args2);
   // test the return of f2 
   printf("\nEXPECTED return of f2 is: 31234\n");
   if (s2 >= 0) {
@@ -155,7 +155,7 @@ int main(int argc, char ** argv) {
   // test the return of f4 
   printf("\ncalling f4 to print an non existed file on the server");
   printf("\nEXPECTED return of f4: some integer other than 0");
-  printf("\nACTUAL return of f4: %d\n", s4);*/
+  printf("\nACTUAL return of f4: %d\n", s4);
   
   /* rpcTerminate */
   printf("\ndo you want to terminate? y/n: ");
