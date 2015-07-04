@@ -319,6 +319,9 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	int length = 0;
 	int param_count = 0;
 	char *f_data;
+	if (rpcEXEC == RPC_FAILURE){ 
+		return -1;
+	} 
 	if (rpcEXEC == RPC_EXECUTE) {
 		if (readNBytes(s, 4, len_buffer) == -1) {
 			close(s);
@@ -491,7 +494,7 @@ int rpcExecute() {
 				if (i == serverDescriptor) {
 					int newfd = accept(serverDescriptor, (struct sockaddr *)&csock_s, (socklen_t *)&len);
 					if (VERBOSE_OUTPUT == 1) {
-						printf("New Connection on Descriptor: %d\n",serverDescriptor);
+						cout << "new connection s is " << serverDescriptor << endl;
 					}
 					if (newfd == -1) {
 					}
@@ -623,6 +626,23 @@ int rpcExecute() {
 						int responseSize = 0;
 						int responseCounter = 0;
 						responseSize += sizeof(char);  // rpc call
+
+						if (skeletonResult < 0)  {
+							char responseBuffer[responseSize];
+							char call_type = RPC_FAILURE;
+							memcpy(responseBuffer+responseCounter, &call_type, sizeof(char));
+							int written = 0, result = 0;
+                                                	while (written < responseSize) {
+                                                        	result = write(i, responseBuffer + written, responseSize - written);
+                                                        	if (result == -1) {
+                                                         	       return result;
+                                                        	}
+                                                        	written += result;
+                                                	}
+
+							continue;
+						}
+						
 						responseSize += sizeof(int);   // length of function name
 						responseSize += name.length(); // name
 						responseSize += sizeof(int);   // argsarray size
