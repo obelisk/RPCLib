@@ -683,7 +683,9 @@ int rpcExecute() {
 
 						int size = 0;
 						for (int argsIndex = 0; argsIndex < param_count; ++argsIndex) {
-							cout << "tempArgs1 " << responseCounter << endl;
+							if(VERBOSE_OUTPUT == 1){
+								printf("Our Buffer Pointer is At: %d\n", responseCounter);
+							}
 							int variableType = (tempArgsArray[argsIndex] >> 16) & 255;
 							int variableLength = tempArgsArray[argsIndex] & 65535;
 							if (variableLength == 0) {
@@ -711,7 +713,9 @@ int rpcExecute() {
 							arrToInt(&testValue, (char *)(tempArgs[argsIndex]));
 							memcpy(responseBuffer + responseCounter, tempArgs[argsIndex], size);
 							responseCounter += size;
-							cout << "tempArgs " << responseCounter << endl;
+						}
+						if(VERBOSE_OUTPUT == 1){
+							printf("Our Buffer Pointer Ended At: %d\n", responseCounter);
 						}
 						int written = 0, result = 0;
 						while (written < responseSize) {
