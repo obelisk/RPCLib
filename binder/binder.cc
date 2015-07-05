@@ -349,6 +349,10 @@ int main(int argc, char **argv) {
 							unsigned char message_type = RPC_FAILURE;
 							write(des, &message_type, 1);
 						} else {
+							if(server.server == "127.0.0.1"){
+								gethostname(hostname, 255);
+								server.server = std::string(hostname, 255);
+							}
 							if (VERBOSE_OUTPUT == 1) {
 								printf("Client Asked for Function, Gave Server: %s, Port: %d\n", server.server.c_str(),
 									   server.port);
