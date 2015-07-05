@@ -126,7 +126,8 @@ server_t findFunction(func_def_t new_function) {
 
 int main(int argc, char **argv) {
 	// Variables
-	int port = 0, server_port = 0, error = 0, result = 0, shouldRun = 1, first_decriptor = 0, length = 0, param_count = 0;
+	int port = 0, server_port = 0, error = 0, result = 0, shouldRun = 1, first_decriptor = 0, length = 0,
+		param_count = 0;
 	char hostname[255];
 	char len_buffer[4];
 	char portStr[5];
@@ -364,7 +365,7 @@ int main(int argc, char **argv) {
 						}
 						free(new_function.params);
 					} else if (call_type == RPC_TERMINATE) {
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("Received A Terminate Instruction.\n");
 						}
 						for (std::deque<server_data_t>::iterator i = server_list.begin(); i != server_list.end(); ++i) {
@@ -372,7 +373,8 @@ int main(int argc, char **argv) {
 							char terminate = RPC_TERMINATE;
 							write(connection, &terminate, 1);
 							close(connection);
-							for (std::vector<func_def_t>::iterator it = i->supported_functions.begin(); it != i->supported_functions.end(); ++it){
+							for (std::vector<func_def_t>::iterator it = i->supported_functions.begin();
+								 it != i->supported_functions.end(); ++it) {
 								free(it->params);
 							}
 						}

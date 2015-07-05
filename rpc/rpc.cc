@@ -489,18 +489,18 @@ int rpcExecute() {
 					char len_buffer[4];
 					int length = 0;
 					int param_count = 0;
-					if (call == RPC_TERMINATE) { 
+					if (call == RPC_TERMINATE) {
 						int error = getpeername(i, (struct sockaddr *)&csock_s, &len);
-						if (error == -1) { 
+						if (error == -1) {
 							perror("getpeername: ");
 							return error;
 						}
 						string ip = inet_ntoa(csock_s.sin_addr);
 						struct hostent *he = gethostbyname(binderAddr);
-						if (he->h_addr_list[0] == ip) { 
+						if (he->h_addr_list[0] == ip) {
 							FD_ZERO(&master);
-							close (serverDescriptor);
-						}	
+							close(serverDescriptor);
+						}
 						return 0;
 					}
 					if (call == RPC_CALL) {
@@ -688,18 +688,18 @@ int rpcExecute() {
 	return 0;
 }
 
-int rpcTerminate() { 
+int rpcTerminate() {
 	clientInit();
-        char terminate = RPC_TERMINATE;
-        int written = 0, result = 0;
-        while (written < 1) {
-                int result = write(bindDescriptor, &terminate, 1);
-                if (result == -1) {
-                        printf("Failed writing to binder\n");
-                        return result;
-                }
-                written += result;
-        }
+	char terminate = RPC_TERMINATE;
+	int written = 0, result = 0;
+	while (written < 1) {
+		int result = write(bindDescriptor, &terminate, 1);
+		if (result == -1) {
+			printf("Failed writing to binder\n");
+			return result;
+		}
+		written += result;
+	}
 
-	return 0; 
+	return 0;
 }
