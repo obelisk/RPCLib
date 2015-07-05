@@ -127,7 +127,8 @@ server_t findFunction(func_def_t new_function) {
 int main(int argc, char **argv) {
 	// Variables
 	int port = 0, server_port = 0, error = 0, result = 0, shouldRun = 1, first_decriptor = 0, length = 0, param_count = 0;
-	char *hostname = (char *)malloc(255), *len_buffer = (char *)malloc(4);
+	char hostname[255];
+	char len_buffer[4];
 	char portStr[5];
 
 	struct sockaddr_in ssock_s;
@@ -361,6 +362,7 @@ int main(int argc, char **argv) {
 							intToArr(server.port, int_arr);
 							write(des, &int_arr, 4);
 						}
+						free(new_function.params);
 					} else if (call_type == RPC_TERMINATE) {
 						if(VERBOSE_OUTPUT == 1){
 							printf("Received A Terminate Instruction.\n");
@@ -370,8 +372,11 @@ int main(int argc, char **argv) {
 							char terminate = RPC_TERMINATE;
 							write(connection, &terminate, 1);
 							close(connection);
-							shouldRun = 0;
+							for (std::vector<func_def_t>::iterator it = i->supported_functions.begin(); it != i->supported_functions.end(); ++it){
+								free(it->params);
+							}
 						}
+						shouldRun = 0;
 					}
 				}
 			}
@@ -379,7 +384,5 @@ int main(int argc, char **argv) {
 	}
 	// Closing housekeeping
 	close(ssock);
-	free(hostname);
-	free(len_buffer);
 	return 0;
 }
