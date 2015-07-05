@@ -18,6 +18,12 @@ server: build/librpc.a
 	-rm -rf build/server.dSYM
 	clang++ -Iinclude -Wall -g -o build/server server/server.c server/server_function_skels.c server/server_functions.c build/librpc.a
 
+server-alt: build/librpc.a
+	-rm build/server-alt
+	-rm -rf build/server-alt.dSYM
+	clang++ -Iinclude -Wall -g -o build/server-alt server-alt/server.c server-alt/server_function_skels.c server-alt/server_functions.c build/librpc.a
+
+
 binder: build/librpc.a
 	-rm build/binder
 	-rm -rf build/binder.dSYM

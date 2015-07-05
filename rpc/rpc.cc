@@ -193,12 +193,12 @@ int rpcCall(char *name, int *argTypes, void **args) {
 		written += result;
 	}
 
-	char call;
+	char call = '\0';
+	int result2 = 0;
+	result2 = readNBytes(bindDescriptor, 1, &call);
 	if (call == RPC_FAILURE) { 
 		return -1;
 	}
-	int result2 = 0;
-	result2 = readNBytes(bindDescriptor, 1, &call);
 	char hostnameLength[4];
 	char *hostname;
 	char port[4];
