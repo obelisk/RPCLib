@@ -5,18 +5,18 @@ clean:
 
 library:
 	-rm -rf build/*.a
-	clang++ --std=c++11 -Iinclude -Wall -g -c rpc/rpc.cc -o build/librpc.o
+	clang++ --std=c++11 -pthread -Iinclude -Wall -g -c rpc/rpc.cc -o build/librpc.o
 	clang++ -Iinclude -Wall -g -c rpc/util.cc -o build/util.o
 	ar rcs build/librpc.a build/librpc.o build/util.o
 	rm build/*.o
 
 client: build/librpc.a
-	clang++ -Iinclude -Wall -g -o build/client client/client1.c build/librpc.a
+	clang++ -Iinclude -pthread -Wall -g -o build/client client/client1.c build/librpc.a
 
 server: build/librpc.a
 	-rm build/server
 	-rm -rf build/server.dSYM
-	clang++ -Iinclude -Wall -g -o build/server server/server.c server/server_function_skels.c server/server_functions.c build/librpc.a
+	clang++ -Iinclude -pthread -Wall -g -o build/server server/server.c server/server_function_skels.c server/server_functions.c build/librpc.a
 
 server-alt: build/librpc.a
 	-rm build/server-alt
