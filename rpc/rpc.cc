@@ -62,6 +62,7 @@ struct thread_args{
 	int param_count;
 	void ** tempArgs;	
 };
+
 int skeletonHelper(string mapKey, int * tempArgsArray, int i, string name, int param_count, void ** tempArgs) { 
 	skeleton newf = myMap.find(mapKey)->second;
 	int skeletonResult = newf(tempArgsArray, tempArgs);
@@ -166,10 +167,23 @@ int skeletonHelper(string mapKey, int * tempArgsArray, int i, string name, int p
 		}
 		written += result;
 	}
+	return 0;
 }
 void * skeletonThread(void * args) {
         struct thread_args * temp = (struct thread_args *) args;
+    	if(VERBOSE_OUTPUT == 1){
+    		printf("Starting a Thread to Handle Function Call\n");
+    		printf("Args Struct At: %p\n", args);
+    		printf("Descriptor(?): %d\n", temp->i);
+    		printf("Function Map Key: %s\n", temp->mapKey.c_str());
+    		printf("Param Count: %d\n", temp->param_count);
+    	}
         skeletonHelper (temp->mapKey, temp->tempArgsArray, temp->i, temp->name, temp->param_count, temp->tempArgs);
+        // We may need more cleanup here if these pointers contain more pointers that need to be freed
+        // Please investigate Dan
+        free(temp->tempArgs);
+        free(temp->tempArgsArray);
+        free(temp);
         pthread_exit(0);
 }
 
@@ -402,7 +416,6 @@ int rpcCall(char *name, int *argTypes, void **args) {
 		counter += sizeof(4);
 	}
 	int argsIndex = 0;
-	int size = 0;
 
 	while (argTypes[argsIndex]) {
 		int variableType = (argTypes[argsIndex] >> 16) & 255;
@@ -657,7 +670,11 @@ int rpcExecute() {
 						int bad = 0;
 						int param = 0;
 						int paramSize[param_count];
-						int tempArgsArray[param_count];
+						// You're passing this to another function, it can't be on the stack because it
+						// needs to be long lived.
+						// This still needs to be freed
+						//int tempArgsArray[param_count];
+						int *tempArgsArray = (int*)malloc(sizeof(int) * param_count);
 						for (int x = 0; x < param_count; ++x) {
 							if (readNBytes(i, 4, len_buffer) == -1) {
 								printf("Failed reading from server\n");
@@ -688,8 +705,11 @@ int rpcExecute() {
 						if (VERBOSE_OUTPUT == 1) {
 							printf("The Function Being Accessed in Map is: %s\n", mapKey.c_str());
 						}
-						printf("shit\n");
-						void *tempArgs[param_count];
+						// You're passing this to another function, it can't be on the stack because it
+						// needs to be long lived.
+						// This still needs to be freed
+						//void *tempArgs[param_count];
+						void ** tempArgs = (void**)malloc(sizeof(void*)*param_count);
 						for (int x = 0; x < param_count; x++) {
 							char *temp_buffer = (char *)malloc(paramSize[x]);
 							tempArgs[x] = (void *)temp_buffer;
@@ -698,19 +718,19 @@ int rpcExecute() {
 								FD_CLR(i, &master);
 							}
 						}
-						printf("hi0\n");
 						pthread_t pth;
-						printf("hi1\n");
-						thread_args * skel_args;
-						printf("hi2\n");
+						struct thread_args * skel_args = (struct thread_args*)malloc(sizeof(struct thread_args));
 						skel_args->mapKey = mapKey;
-						printf("hi3\n");
 						skel_args->tempArgsArray = tempArgsArray;
-						printf("hi4\n");
 						skel_args->i = i;
 						skel_args->name = name;
 						skel_args->param_count = param_count;
 						skel_args->tempArgs = tempArgs;
+						if(VERBOSE_OUTPUT == 1){
+							printf("Preparing for thread start...\n");
+							printf("Structure At  : %p\n", skel_args);
+							printf("Descriptor (?): %d\n", skel_args->i);
+						}
 						pthread_create(&pth, NULL, skeletonThread, (void *)skel_args);
 						/*skeleton newf = myMap.find(mapKey)->second;
 						int skeletonResult = newf(tempArgsArray, tempArgs);
@@ -827,7 +847,7 @@ int rpcExecute() {
 int rpcTerminate() {
 	clientInit();
 	char terminate = RPC_TERMINATE;
-	int written = 0, result = 0;
+	int written = 0;
 	while (written < 1) {
 		int result = write(bindDescriptor, &terminate, 1);
 		if (result == -1) {
