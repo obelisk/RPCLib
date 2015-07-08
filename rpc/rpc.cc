@@ -9,6 +9,7 @@
 
 // C++ Headers
 #include <string>
+#include <cstring>
 #include <map>
 
 // Local headers
