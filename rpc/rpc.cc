@@ -1,37 +1,29 @@
 // C Headers
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <pthread.h>
 
 // C++ Headers
-#include <iostream>
 #include <string>
-#include <cstring>
 #include <map>
-#include <vector>
 
 // Local headers
 #include "rpc.h"
 #include "rpc_consts.h"
 #include "util.h"
 
-using namespace std;
 char *binderAddr;
 char *binderPort;
 int bindDescriptor;
 int serverDescriptor;
 int serverPort;
-map<string, skeleton> myMap;
+std::map<std::string, skeleton> myMap;
 int switchHelper(int variableType, int variableLength) {
 	int size = 0;
-	//	cout << "got in 3 " << variableType << endl;
 	switch (variableType) {
-	//		cout << "got in 2 " << endl;
 	case ARG_CHAR:
 		size = sizeof(char) * variableLength;
 		break;
@@ -39,7 +31,6 @@ int switchHelper(int variableType, int variableLength) {
 		size = sizeof(short) * variableLength;
 		break;
 	case ARG_INT:
-		//			cout << "got in " << endl;
 		size = sizeof(int) * variableLength;
 		break;
 	case ARG_LONG:
@@ -55,15 +46,15 @@ int switchHelper(int variableType, int variableLength) {
 	return size;
 }
 struct thread_args{ 
-	string mapKey;
+	std::string mapKey;
 	int * tempArgsArray;
 	int i;
-	string name;
+	std::string name;
 	int param_count;
 	void ** tempArgs;	
 };
 
-int skeletonHelper(string mapKey, int * tempArgsArray, int i, string name, int param_count, void ** tempArgs) { 
+int skeletonHelper(std::string mapKey, int * tempArgsArray, int i, std::string name, int param_count, void ** tempArgs) { 
 	skeleton newf = myMap.find(mapKey)->second;
 	int skeletonResult = newf(tempArgsArray, tempArgs);
 	if (VERBOSE_OUTPUT == 1) {
@@ -179,8 +170,6 @@ void * skeletonThread(void * args) {
     		printf("Param Count: %d\n", temp->param_count);
     	}
         skeletonHelper (temp->mapKey, temp->tempArgsArray, temp->i, temp->name, temp->param_count, temp->tempArgs);
-        // We may need more cleanup here if these pointers contain more pointers that need to be freed
-        // Please investigate Dan
         free(temp->tempArgs);
         free(temp->tempArgsArray);
         free(temp);
@@ -235,11 +224,11 @@ int clientInit() {
 	binderAddr = getenv("BINDER_ADDRESS");
 	binderPort = getenv("BINDER_PORT");
 	if (binderAddr == NULL) {
-		cerr << "Env variable BINDER_ADDRESS not found" << endl;
+		printf("Env variable BINDER_ADDRESS not found\n");
 		return 1;
 	}
 	if (binderPort == NULL) {
-		cerr << "Env variable BINDER_PORT not found" << endl;
+		printf("Env variable BINDER_PORT not found\n");
 		return 1;
 	}
 	if (connectBinder() != 0) {
@@ -255,11 +244,11 @@ int rpcInit() {
 	binderAddr = getenv("BINDER_ADDRESS");
 	binderPort = getenv("BINDER_PORT");
 	if (binderAddr == NULL) {
-		cerr << "Env variable BINDER_ADDRESS not found" << endl;
+		printf("Env variable BINDER_ADDRESS not found\n");
 		return 1;
 	}
 	if (binderPort == NULL) {
-		cerr << "Env variable BINDER_PORT not found" << endl;
+		printf("Env variable BINDER_PORT not found\n");
 		return 1;
 	}
 	if (connectBinder() != 0) {
@@ -519,17 +508,13 @@ int rpcRegister(char *name, int *argTypes, skeleton f) {
 	totalMsgSize += sizeof(int);  // Length of funtion name
 	totalMsgSize += strlen(name); // Name
 	totalMsgSize += sizeof(int);  // Size of argsarray
-	string str = name;
+	std::string str = name;
 	int argSize = 0;
 	while (argTypes[argSize]) {
-		str += to_string(argTypes[argSize]);
+		str += std::to_string(argTypes[argSize]);
 		argSize++;
 	}
 	myMap[str] = f;
-
-	// The size of int thing is nice, but everything
-	// will break if it's ever not 4. This is because
-	// of both client and server side issues. Wishlist
 
 	totalMsgSize += argSize * sizeof(int); // Args
 	char buffer[totalMsgSize];
@@ -602,7 +587,7 @@ int rpcExecute() {
 				if (i == serverDescriptor) {
 					int newfd = accept(serverDescriptor, (struct sockaddr *)&csock_s, (socklen_t *)&len);
 					if (VERBOSE_OUTPUT == 1) {
-						cout << "new connection s is " << serverDescriptor << endl;
+						printf("New Connection\n");
 					}
 					if (newfd == -1) {
 					}
@@ -619,8 +604,8 @@ int rpcExecute() {
 						break;
 					}
 					char *f_data;
-					string name;
-					string mapKey;
+					std::string name;
+					std::string mapKey;
 					char len_buffer[4];
 					int length = 0;
 					int param_count = 0;
@@ -630,7 +615,7 @@ int rpcExecute() {
 							perror("getpeername: ");
 							return error;
 						}
-						string ip = inet_ntoa(csock_s.sin_addr);
+						std::string ip = inet_ntoa(csock_s.sin_addr);
 						struct hostent *he = gethostbyname(binderAddr);
 						if (he->h_addr_list[0] == ip) {
 							FD_ZERO(&master);
@@ -652,12 +637,12 @@ int rpcExecute() {
 							free(f_data);
 							break;
 						}
-						name = string(f_data, length);
+						name = std::string(f_data, length);
 						mapKey = name;
 						free(f_data);
 
 						if (readNBytes(i, 4, len_buffer) == -1) {
-							cout << "error " << endl;
+							printf("Error in connection.\n");
 							close(i);
 							FD_CLR(i, &master);
 							break;
@@ -670,10 +655,6 @@ int rpcExecute() {
 						int bad = 0;
 						int param = 0;
 						int paramSize[param_count];
-						// You're passing this to another function, it can't be on the stack because it
-						// needs to be long lived.
-						// This still needs to be freed
-						//int tempArgsArray[param_count];
 						int *tempArgsArray = (int*)malloc(sizeof(int) * param_count);
 						for (int x = 0; x < param_count; ++x) {
 							if (readNBytes(i, 4, len_buffer) == -1) {
@@ -683,7 +664,7 @@ int rpcExecute() {
 								FD_CLR(i, &master);
 							}
 							arrToInt(&param, len_buffer);
-							mapKey += to_string(param);
+							mapKey += std::to_string(param);
 							tempArgsArray[x] = param;
 							params[x].input = (unsigned char)((param & INPUT_BIT) > 0);
 							params[x].output = (unsigned char)((param & OUTPUT_BIT) > 0);
@@ -705,10 +686,6 @@ int rpcExecute() {
 						if (VERBOSE_OUTPUT == 1) {
 							printf("The Function Being Accessed in Map is: %s\n", mapKey.c_str());
 						}
-						// You're passing this to another function, it can't be on the stack because it
-						// needs to be long lived.
-						// This still needs to be freed
-						//void *tempArgs[param_count];
 						void ** tempArgs = (void**)malloc(sizeof(void*)*param_count);
 						for (int x = 0; x < param_count; x++) {
 							char *temp_buffer = (char *)malloc(paramSize[x]);
@@ -732,110 +709,6 @@ int rpcExecute() {
 							printf("Descriptor (?): %d\n", skel_args->i);
 						}
 						pthread_create(&pth, NULL, skeletonThread, (void *)skel_args);
-						/*skeleton newf = myMap.find(mapKey)->second;
-						int skeletonResult = newf(tempArgsArray, tempArgs);
-						if (VERBOSE_OUTPUT == 1) {
-							printf("The Skeleton Function returned: ");
-							switch (skeletonResult) {
-							case 0:
-								printf("Successful\n");
-								break;
-							default:
-								printf("Failure\n");
-							}
-						}
-						int responseSize = 0;
-						int responseCounter = 0;
-						responseSize += sizeof(char); // rpc call
-
-						if (skeletonResult < 0) {
-							char responseBuffer[responseSize];
-							char call_type = RPC_FAILURE;
-							memcpy(responseBuffer + responseCounter, &call_type, sizeof(char));
-							int written = 0, result = 0;
-							while (written < responseSize) {
-								result = write(i, responseBuffer + written, responseSize - written);
-								if (result == -1) {
-									return result;
-								}
-								written += result;
-							}
-
-							continue;
-						}
-
-						responseSize += sizeof(int);   // length of function name
-						responseSize += name.length(); // name
-						responseSize += sizeof(int);   // argsarray size
-						responseSize += param_count * sizeof(int);
-						for (int index = 0; index < param_count; ++index) {
-							int variableType = (tempArgsArray[index] >> 16) & 255;
-							int variableLength = tempArgsArray[index] & 65535;
-							if (variableLength == 0) {
-								variableLength = 1;
-							}
-							responseSize += switchHelper(variableType, variableLength);
-						}
-						char responseBuffer[responseSize];
-						if (VERBOSE_OUTPUT == 1) {
-							printf("Our Response To The Client is %d bytes long\n", responseSize);
-						}
-
-						// writing rpc call
-						char call_type = RPC_EXECUTE;
-						memcpy(responseBuffer + responseCounter, &call_type, sizeof(char));
-						responseCounter += sizeof(char);
-
-						// writting name length
-						int nameLength = name.length();
-						char int_arr[4];
-						intToArr(nameLength, int_arr);
-						memcpy(responseBuffer + responseCounter, int_arr, 4);
-						responseCounter += sizeof(4);
-
-						// writing name
-						memcpy(responseBuffer + responseCounter, name.c_str(), name.length());
-						responseCounter += nameLength;
-
-						// writing arg size
-						intToArr(param_count, int_arr);
-						memcpy(responseBuffer + responseCounter, int_arr, 4);
-						responseCounter += sizeof(4);
-
-						// writing args
-						for (int x = 0; x < param_count; x++) {
-							intToArr(tempArgsArray[x], int_arr);
-							memcpy(responseBuffer + responseCounter, int_arr, 4);
-							responseCounter += sizeof(4);
-						}
-
-						int size = 0;
-						for (int argsIndex = 0; argsIndex < param_count; ++argsIndex) {
-							if (VERBOSE_OUTPUT == 1) {
-								printf("Our Buffer Pointer is At: %d\n", responseCounter);
-							}
-							int variableType = (tempArgsArray[argsIndex] >> 16) & 255;
-							int variableLength = tempArgsArray[argsIndex] & 65535;
-							if (variableLength == 0) {
-								variableLength = 1;
-							}
-							size = switchHelper(variableType, variableLength);
-							int testValue = 0;
-							arrToInt(&testValue, (char *)(tempArgs[argsIndex]));
-							memcpy(responseBuffer + responseCounter, tempArgs[argsIndex], size);
-							responseCounter += size;
-						}
-						if (VERBOSE_OUTPUT == 1) {
-							printf("Our Buffer Pointer Ended At: %d\n", responseCounter);
-						}
-						int written = 0, result = 0;
-						while (written < responseSize) {
-							result = write(i, responseBuffer + written, responseSize - written);
-							if (result == -1) {
-								return result;
-							}
-							written += result;
-						}*/
 					}
 				}
 			}
