@@ -1,6 +1,5 @@
 // C Headers
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -48,10 +47,10 @@ int switchHelper(int variableType, int variableLength) {
 	return size;
 }
 struct thread_args{ 
-	std::string mapKey;
+	char * mapKey;
 	int * tempArgsArray;
 	int i;
-	std::string name;
+	char * name;
 	int param_count;
 	void ** tempArgs;	
 };
@@ -164,14 +163,19 @@ int skeletonHelper(std::string mapKey, int * tempArgsArray, int i, std::string n
 }
 void * skeletonThread(void * args) {
         struct thread_args * temp = (struct thread_args *) args;
+        std::string mapKey = std::string(temp->mapKey);
+        std::string name = std::string(temp->name);
     	if(VERBOSE_OUTPUT == 1){
     		printf("Starting a Thread to Handle Function Call\n");
     		printf("Args Struct At: %p\n", args);
     		printf("Descriptor(?): %d\n", temp->i);
-    		printf("Function Map Key: %s\n", temp->mapKey.c_str());
+    		printf("Function Map Key: %s\n", temp->mapKey);
     		printf("Param Count: %d\n", temp->param_count);
     	}
-        skeletonHelper (temp->mapKey, temp->tempArgsArray, temp->i, temp->name, temp->param_count, temp->tempArgs);
+
+        skeletonHelper (mapKey, temp->tempArgsArray, temp->i, name, temp->param_count, temp->tempArgs);
+        free(temp->mapKey);
+        free(temp->name);
         free(temp->tempArgs);
         free(temp->tempArgsArray);
         free(temp);
@@ -699,16 +703,25 @@ int rpcExecute() {
 						}
 						pthread_t pth;
 						struct thread_args * skel_args = (struct thread_args*)malloc(sizeof(struct thread_args));
-						skel_args->mapKey = mapKey;
+
+						skel_args->mapKey = (char*)malloc(mapKey.length());
+						memcpy(skel_args->mapKey, mapKey.c_str(), mapKey.length());
+						//skel_args->mapKey[mapKey.length()-1] = '\0';
+
 						skel_args->tempArgsArray = tempArgsArray;
 						skel_args->i = i;
-						skel_args->name = name;
+
+						skel_args->name = (char*)malloc(name.length());
+						memcpy(skel_args->name, name.c_str(), name.length());
+						//skel_args->name[name.length()-1] = '\0';
+
 						skel_args->param_count = param_count;
 						skel_args->tempArgs = tempArgs;
 						if(VERBOSE_OUTPUT == 1){
 							printf("Preparing for thread start...\n");
 							printf("Structure At  : %p\n", skel_args);
 							printf("Descriptor (?): %d\n", skel_args->i);
+							printf("Function Key: %s\n", skel_args->mapKey);
 						}
 						pthread_create(&pth, NULL, skeletonThread, (void *)skel_args);
 					}
