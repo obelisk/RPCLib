@@ -505,7 +505,7 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	return 0;
 }
 
-int rpcCacheCall(char *name, int *argTypes, void **args) { return 0; }
+int rpcCacheCall(char *name, int *argTypes, void **args) { return -1; }
 
 int rpcRegister(char *name, int *argTypes, skeleton f) {
 	int totalMsgSize = 0;
@@ -521,6 +521,9 @@ int rpcRegister(char *name, int *argTypes, skeleton f) {
 		argSize++;
 	}
 	myMap[str] = f;
+	if(VERBOSE_OUTPUT == 1){
+		printf("Registered Local Function: %s\n", str.c_str());
+	}
 
 	totalMsgSize += argSize * sizeof(int); // Args
 	char buffer[totalMsgSize];
@@ -636,6 +639,9 @@ int rpcExecute() {
 							break;
 						}
 						arrToInt(&length, len_buffer);
+						if(VERBOSE_OUTPUT == 1){
+							printf("Name Length of Called Function: %d\n", length);
+						}
 						f_data = (char *)malloc((length + 1) * sizeof(char));
 						f_data[length] = '\0';
 						result = readNBytes(i, length, f_data);
@@ -644,6 +650,9 @@ int rpcExecute() {
 							break;
 						}
 						name = std::string(f_data, length);
+						if(VERBOSE_OUTPUT == 1){
+							printf("Name: %s\n", name.c_str());
+						}
 						mapKey = name;
 						free(f_data);
 
@@ -654,10 +663,10 @@ int rpcExecute() {
 							break;
 						}
 						arrToInt(&param_count, len_buffer);
-						param_t *params = (param_t *)malloc(sizeof(param_t) * param_count);
-						if (VERBOSE_OUTPUT == 1) {
-							printf("We have %d params for this function.\n", param_count);
+						if(VERBOSE_OUTPUT == 1){
+							printf("Expected Number of Parameters: %d\n", param_count);
 						}
+						param_t *params = (param_t *)malloc(sizeof(param_t) * param_count);
 						int bad = 0;
 						int param = 0;
 						int paramSize[param_count];
@@ -676,6 +685,13 @@ int rpcExecute() {
 							params[x].output = (unsigned char)((param & OUTPUT_BIT) > 0);
 							params[x].type = (0x00FF0000 & param) >> 16;
 							params[x].length = 0x0000FFFF & param;
+							if(VERBOSE_OUTPUT == 1){
+								printf("Parameter Info of: %d\n", x);
+								printf("\tInput:\t%d\n", params[x].input);
+								printf("\tOutput:\t%d\n", params[x].output);
+								printf("\tType:\t%d\n",params[x].type);
+								printf("\tLength:\t%d\n",params[x].length);
+							}
 							int tempLength = 1;
 							if (params[x].length > tempLength) {
 								tempLength = params[x].length;
@@ -691,6 +707,10 @@ int rpcExecute() {
 						}
 						if (VERBOSE_OUTPUT == 1) {
 							printf("The Function Being Accessed in Map is: %s\n", mapKey.c_str());
+							//printf("Function Pointer: %p\n", myMap.find(mapKey)->second);
+							if(myMap.count(mapKey) == 0){
+								printf("CRITICAL ERROR: This server doesn't have this function\n");
+							}
 						}
 						void ** tempArgs = (void**)malloc(sizeof(void*)*param_count);
 						for (int x = 0; x < param_count; x++) {
