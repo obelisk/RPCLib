@@ -704,16 +704,16 @@ int rpcExecute() {
 						pthread_t pth;
 						struct thread_args * skel_args = (struct thread_args*)malloc(sizeof(struct thread_args));
 
-						skel_args->mapKey = (char*)malloc(mapKey.length());
+						skel_args->mapKey = (char*)malloc(mapKey.length()+1);
 						memcpy(skel_args->mapKey, mapKey.c_str(), mapKey.length());
-						//skel_args->mapKey[mapKey.length()-1] = '\0';
+						skel_args->mapKey[mapKey.length()] = '\0';
 
 						skel_args->tempArgsArray = tempArgsArray;
 						skel_args->i = i;
 
-						skel_args->name = (char*)malloc(name.length());
+						skel_args->name = (char*)malloc(name.length()+1);
 						memcpy(skel_args->name, name.c_str(), name.length());
-						//skel_args->name[name.length()-1] = '\0';
+						skel_args->name[name.length()] = '\0';
 
 						skel_args->param_count = param_count;
 						skel_args->tempArgs = tempArgs;
