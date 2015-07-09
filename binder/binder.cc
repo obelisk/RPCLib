@@ -69,9 +69,12 @@ int functionsEqual(func_def_t f1, func_def_t f2) {
 		if (new_params[j].type != check_params[j].type) {
 			return 0;
 		}
-		//if (new_params[j].length != check_params[j].length) {
-		//	return 0;
-		//}
+		if(new_params[j].length == 0 && check_params[j].length != 0){
+			return 0;
+		}
+		if(check_params[j].length == 0 && new_params[j].length != 0){
+			return 0;
+		}
 	}
 	return 1;
 }
