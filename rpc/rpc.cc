@@ -516,8 +516,16 @@ int rpcRegister(char *name, int *argTypes, skeleton f) {
 	totalMsgSize += sizeof(int);  // Size of argsarray
 	std::string str = name;
 	int argSize = 0;
+	int workingArg = 0x0;
 	while (argTypes[argSize]) {
-		str += std::to_string(argTypes[argSize]);
+		workingArg = argTypes[argSize];
+		if((workingArg & 0x0000FFFF) > 0){
+			workingArg = (argTypes[argSize] & 0xFFFF0000) + 1;
+			if(VERBOSE_OUTPUT == 1){
+				printf("This parameter is an array, reducing size to 1: %d\t %d\n", argTypes[argSize], workingArg);
+			}
+		}
+		str += std::to_string(workingArg);
 		argSize++;
 	}
 	myMap[str] = f;
@@ -679,7 +687,12 @@ int rpcExecute() {
 								FD_CLR(i, &master);
 							}
 							arrToInt(&param, len_buffer);
-							mapKey += std::to_string(param);
+							if((param & 0x0000FFFF) > 0){
+								int temp_param = (param & 0xFFFF0000) + 1;
+								mapKey += std::to_string(temp_param);
+							}else{
+								mapKey += std::to_string(param);
+							}
 							tempArgsArray[x] = param;
 							params[x].input = (unsigned char)((param & INPUT_BIT) > 0);
 							params[x].output = (unsigned char)((param & OUTPUT_BIT) > 0);
