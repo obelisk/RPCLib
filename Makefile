@@ -46,14 +46,14 @@ release:
 	# Clean
 	-rm -rf release/*
 	# Library Compile
-	clang++ --std=c++11 -Iinclude -Wall -pthread -c rpc/rpc.cc -o release/librpc.o
 	clang++ --std=c++11 -Iinclude -Wall -c rpc/util.cc -o release/util.o
+	clang++ --std=c++11 -Iinclude -Wall -pthread -c rpc/rpc.cc -o release/librpc.o
 	# Library Package
-	ar rcs release/librpc.a release/librpc.o release/util.o
+	ar rcs release/librpc.a release/util.o release/librpc.o
 	# Clean
-	rm release/*.o
+	#rm release/*.o
 	# Binder
-	clang++ -Iinclude -Lrelease -Wall -lrpc -o release/binder binder/binder.cc
+	clang++ -Iinclude -Lrelease -Wall -lrpc -o release/binder binder/binder.cc rpc/util.cc
 	# Copy Header
 	cp include/rpc.h release/rpc.h
 
