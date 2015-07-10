@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
   argTypes6[1] = (1 << ARG_INPUT) | (ARG_INT << 16);
   argTypes6[2] = 0;
 
-  argTypes7[0] = (1 << ARG_OUTPUT) | (1 << ARG_INPUT) | (ARG_CHAR << 16);
+  argTypes7[0] = (1 << ARG_OUTPUT) | (1 << ARG_INPUT) | (ARG_CHAR << 16) | 1;
   argTypes7[1] = 0;
   /* 
    * register server functions f0~f4

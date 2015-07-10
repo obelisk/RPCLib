@@ -105,7 +105,7 @@ int main(int argc, char ** argv) {
   int argTypes7[2];
   void ** args7;
  //  int return7;
-   argTypes7[0] = (1 << ARG_OUTPUT) |(1 << ARG_INPUT) | (ARG_CHAR << 16);
+   argTypes7[0] = (1 << ARG_OUTPUT) |(1 << ARG_INPUT) | (ARG_CHAR << 16) | 2;
    argTypes7[1] = 0;
  // argTypes7[2] = 0;
    args7 = (void **)malloc(1 * sizeof(void *));
