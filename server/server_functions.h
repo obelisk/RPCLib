@@ -25,7 +25,7 @@ int f5();
 
 int f6(int a);
 
-int f7 (int a[]);
+void f7 (char a[]);
 
 double f8(double a, double b);
 

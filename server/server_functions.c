@@ -92,12 +92,16 @@ void f4(char a[]) {
   /* print file a to a printer */
 }
 
-int f7(int a[]){ 
-	int size = a[0];
-	printf("test value %d\n", size);
-	int sum = 0;
-	for (int i = 0; i < size; i++) {
-		sum += a[i];
+void f7(char a[]){ 
+	int size = 0;
+       	printf("FUNCTION PRIOR: %s\n", a);
+	while (a[size]) { 
+		size++;
+	} 
+	for (int i = 0; i < size/2; ++i) {
+		char temp = a[size-1 - i];
+		a[size-1-i] = a[i];
+                a[i] = temp;
 	}
-	return sum;
+	printf("FUNCTION: %s\n", a);
 }

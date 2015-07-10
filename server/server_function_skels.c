@@ -73,8 +73,8 @@ int f3_Skel(int *argTypes, void **args) {
   return 0;
 }
 int f7_Skel(int *argTypes, void **args) {
-	printf("shittttt  %d\n", *(int *)args[1]);  
-	*(int *)args[0] =f7((int *)(*args));
+	printf("shittttt  %d\n", *(char *)args[0]);  
+	f7((char *)(*args));
 	return 0;
 }
 /* 
@@ -84,7 +84,7 @@ int f7_Skel(int *argTypes, void **args) {
  */
 int f4_Skel(int *argTypes, void **args) {
 
-  return -1; /* can not print the file */
+  return 0; /* can not print the file */
 }
 
 int f5_Skel(int *argTypes, void **args) { 

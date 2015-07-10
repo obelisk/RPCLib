@@ -102,17 +102,16 @@ int main(int argc, char ** argv) {
   args6[0] = (void *)&return6;
   args6[1] = (void *)&a6;
 
-  int argTypes7[3];
+  int argTypes7[2];
   void ** args7;
-   int return7;
-   argTypes7[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
-   argTypes7[1] = (1 << ARG_INPUT) | (ARG_INT << 16) | 3;
-  argTypes7[2] = 0;
-   args7 = (void **)malloc(2 * sizeof(void *));
+ //  int return7;
+   argTypes7[0] = (1 << ARG_OUTPUT) |(1 << ARG_INPUT) | (ARG_CHAR << 16);
+   argTypes7[1] = 0;
+ // argTypes7[2] = 0;
+   args7 = (void **)malloc(1 * sizeof(void *));
 
-  int a7[3] = {2,2,3};
-  args7[0] = (void *)&return7;
-  args7[1] = (void *)a7;
+  char a7[2] = {'a','b'};
+  args7[0] = (void *)a7;
   
 
 
@@ -236,18 +235,18 @@ int main(int argc, char ** argv) {
   }
 
 
-/*  int s7 = rpcCall("f7", argTypes7, args7);
+  int s7 = rpcCall ("f7", argTypes7, args7);
   // test the return of f3
   printf(
-    "\nEXPECTED return of f7 is: 5\n"
+    "\nEXPECTED return of f7 is: ba\n"
   );
 
   if (s7 >= 0) {
-    printf("ACTUAL return of f7 is: %d\n", *((int *)(args7[0])));
+    printf("ACTUAL return of f7 is: %c %c\n", *(((char *)args7[0])+0), *(((char *)args7[0])+1));
   }
   else {
     printf("Error: %d\n", s7);
-  }*/
+  }
 
 
    int s8 = rpcCall ("f8", argTypes8, args8);
