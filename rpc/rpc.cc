@@ -46,16 +46,16 @@ int switchHelper(int variableType, int variableLength) {
 	}
 	return size;
 }
-struct thread_args{ 
-	char * mapKey;
-	int * tempArgsArray;
+struct thread_args {
+	char *mapKey;
+	int *tempArgsArray;
 	int i;
-	char * name;
+	char *name;
 	int param_count;
-	void ** tempArgs;	
+	void **tempArgs;
 };
 
-int skeletonHelper(std::string mapKey, int * tempArgsArray, int i, std::string name, int param_count, void ** tempArgs) { 
+int skeletonHelper(std::string mapKey, int *tempArgsArray, int i, std::string name, int param_count, void **tempArgs) {
 	skeleton newf = myMap.find(mapKey)->second;
 	int skeletonResult = newf(tempArgsArray, tempArgs);
 	if (VERBOSE_OUTPUT == 1) {
@@ -84,7 +84,6 @@ int skeletonHelper(std::string mapKey, int * tempArgsArray, int i, std::string n
 			}
 			written += result;
 		}
-
 	}
 
 	responseSize += sizeof(int);   // length of function name
@@ -161,25 +160,25 @@ int skeletonHelper(std::string mapKey, int * tempArgsArray, int i, std::string n
 	}
 	return 0;
 }
-void * skeletonThread(void * args) {
-        struct thread_args * temp = (struct thread_args *) args;
-        std::string mapKey = std::string(temp->mapKey);
-        std::string name = std::string(temp->name);
-    	if(VERBOSE_OUTPUT == 1){
-    		printf("Starting a Thread to Handle Function Call\n");
-    		printf("Args Struct At: %p\n", args);
-    		printf("Descriptor(?): %d\n", temp->i);
-    		printf("Function Map Key: %s\n", temp->mapKey);
-    		printf("Param Count: %d\n", temp->param_count);
-    	}
+void *skeletonThread(void *args) {
+	struct thread_args *temp = (struct thread_args *)args;
+	std::string mapKey = std::string(temp->mapKey);
+	std::string name = std::string(temp->name);
+	if (VERBOSE_OUTPUT == 1) {
+		printf("Starting a Thread to Handle Function Call\n");
+		printf("Args Struct At: %p\n", args);
+		printf("Descriptor(?): %d\n", temp->i);
+		printf("Function Map Key: %s\n", temp->mapKey);
+		printf("Param Count: %d\n", temp->param_count);
+	}
 
-        skeletonHelper (mapKey, temp->tempArgsArray, temp->i, name, temp->param_count, temp->tempArgs);
-        free(temp->mapKey);
-        free(temp->name);
-        free(temp->tempArgs);
-        free(temp->tempArgsArray);
-        free(temp);
-        pthread_exit(0);
+	skeletonHelper(mapKey, temp->tempArgsArray, temp->i, name, temp->param_count, temp->tempArgs);
+	free(temp->mapKey);
+	free(temp->name);
+	free(temp->tempArgs);
+	free(temp->tempArgsArray);
+	free(temp);
+	pthread_exit(0);
 }
 
 int setupListener() {
@@ -324,7 +323,7 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	char call = '\0';
 	int result2 = 0;
 	result2 = readNBytes(bindDescriptor, 1, &call);
-	if (call == RPC_FAILURE) { 
+	if (call == RPC_FAILURE) {
 		return -1;
 	}
 	char hostnameLength[4];
@@ -519,9 +518,9 @@ int rpcRegister(char *name, int *argTypes, skeleton f) {
 	int workingArg = 0x0;
 	while (argTypes[argSize]) {
 		workingArg = argTypes[argSize];
-		if((workingArg & 0x0000FFFF) > 0){
+		if ((workingArg & 0x0000FFFF) > 0) {
 			workingArg = (argTypes[argSize] & 0xFFFF0000) + 1;
-			if(VERBOSE_OUTPUT == 1){
+			if (VERBOSE_OUTPUT == 1) {
 				printf("This parameter is an array, reducing size to 1: %d\t %d\n", argTypes[argSize], workingArg);
 			}
 		}
@@ -529,7 +528,7 @@ int rpcRegister(char *name, int *argTypes, skeleton f) {
 		argSize++;
 	}
 	myMap[str] = f;
-	if(VERBOSE_OUTPUT == 1){
+	if (VERBOSE_OUTPUT == 1) {
 		printf("Registered Local Function: %s\n", str.c_str());
 	}
 
@@ -647,7 +646,7 @@ int rpcExecute() {
 							break;
 						}
 						arrToInt(&length, len_buffer);
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("Name Length of Called Function: %d\n", length);
 						}
 						f_data = (char *)malloc((length + 1) * sizeof(char));
@@ -658,7 +657,7 @@ int rpcExecute() {
 							break;
 						}
 						name = std::string(f_data, length);
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("Name: %s\n", name.c_str());
 						}
 						mapKey = name;
@@ -671,14 +670,14 @@ int rpcExecute() {
 							break;
 						}
 						arrToInt(&param_count, len_buffer);
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("Expected Number of Parameters: %d\n", param_count);
 						}
 						param_t *params = (param_t *)malloc(sizeof(param_t) * param_count);
 						int bad = 0;
 						int param = 0;
 						int paramSize[param_count];
-						int *tempArgsArray = (int*)malloc(sizeof(int) * param_count);
+						int *tempArgsArray = (int *)malloc(sizeof(int) * param_count);
 						for (int x = 0; x < param_count; ++x) {
 							if (readNBytes(i, 4, len_buffer) == -1) {
 								printf("Failed reading from server\n");
@@ -687,10 +686,10 @@ int rpcExecute() {
 								FD_CLR(i, &master);
 							}
 							arrToInt(&param, len_buffer);
-							if((param & 0x0000FFFF) > 0){
+							if ((param & 0x0000FFFF) > 0) {
 								int temp_param = (param & 0xFFFF0000) + 1;
 								mapKey += std::to_string(temp_param);
-							}else{
+							} else {
 								mapKey += std::to_string(param);
 							}
 							tempArgsArray[x] = param;
@@ -698,12 +697,12 @@ int rpcExecute() {
 							params[x].output = (unsigned char)((param & OUTPUT_BIT) > 0);
 							params[x].type = (0x00FF0000 & param) >> 16;
 							params[x].length = 0x0000FFFF & param;
-							if(VERBOSE_OUTPUT == 1){
+							if (VERBOSE_OUTPUT == 1) {
 								printf("Parameter Info of: %d\n", x);
 								printf("\tInput:\t%d\n", params[x].input);
 								printf("\tOutput:\t%d\n", params[x].output);
-								printf("\tType:\t%d\n",params[x].type);
-								printf("\tLength:\t%d\n",params[x].length);
+								printf("\tType:\t%d\n", params[x].type);
+								printf("\tLength:\t%d\n", params[x].length);
 							}
 							int tempLength = 1;
 							if (params[x].length > tempLength) {
@@ -720,12 +719,12 @@ int rpcExecute() {
 						}
 						if (VERBOSE_OUTPUT == 1) {
 							printf("The Function Being Accessed in Map is: %s\n", mapKey.c_str());
-							//printf("Function Pointer: %p\n", myMap.find(mapKey)->second);
-							if(myMap.count(mapKey) == 0){
+							// printf("Function Pointer: %p\n", myMap.find(mapKey)->second);
+							if (myMap.count(mapKey) == 0) {
 								printf("CRITICAL ERROR: This server doesn't have this function\n");
 							}
 						}
-						void ** tempArgs = (void**)malloc(sizeof(void*)*param_count);
+						void **tempArgs = (void **)malloc(sizeof(void *) * param_count);
 						for (int x = 0; x < param_count; x++) {
 							char *temp_buffer = (char *)malloc(paramSize[x]);
 							tempArgs[x] = (void *)temp_buffer;
@@ -735,22 +734,22 @@ int rpcExecute() {
 							}
 						}
 						pthread_t pth;
-						struct thread_args * skel_args = (struct thread_args*)malloc(sizeof(struct thread_args));
+						struct thread_args *skel_args = (struct thread_args *)malloc(sizeof(struct thread_args));
 
-						skel_args->mapKey = (char*)malloc(mapKey.length()+1);
+						skel_args->mapKey = (char *)malloc(mapKey.length() + 1);
 						memcpy(skel_args->mapKey, mapKey.c_str(), mapKey.length());
 						skel_args->mapKey[mapKey.length()] = '\0';
 
 						skel_args->tempArgsArray = tempArgsArray;
 						skel_args->i = i;
 
-						skel_args->name = (char*)malloc(name.length()+1);
+						skel_args->name = (char *)malloc(name.length() + 1);
 						memcpy(skel_args->name, name.c_str(), name.length());
 						skel_args->name[name.length()] = '\0';
 
 						skel_args->param_count = param_count;
 						skel_args->tempArgs = tempArgs;
-						if(VERBOSE_OUTPUT == 1){
+						if (VERBOSE_OUTPUT == 1) {
 							printf("Preparing for thread start...\n");
 							printf("Structure At  : %p\n", skel_args);
 							printf("Descriptor (?): %d\n", skel_args->i);

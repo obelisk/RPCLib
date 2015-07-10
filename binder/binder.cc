@@ -69,10 +69,10 @@ int functionsEqual(func_def_t f1, func_def_t f2) {
 		if (new_params[j].type != check_params[j].type) {
 			return 0;
 		}
-		if(new_params[j].length == 0 && check_params[j].length != 0){
+		if (new_params[j].length == 0 && check_params[j].length != 0) {
 			return 0;
 		}
-		if(check_params[j].length == 0 && new_params[j].length != 0){
+		if (check_params[j].length == 0 && new_params[j].length != 0) {
 			return 0;
 		}
 	}
@@ -352,7 +352,7 @@ int main(int argc, char **argv) {
 							unsigned char message_type = RPC_FAILURE;
 							write(des, &message_type, 1);
 						} else {
-							if(server.server == "127.0.0.1"){
+							if (server.server == "127.0.0.1") {
 								gethostname(hostname, 255);
 								server.server = std::string(hostname, 255);
 							}
