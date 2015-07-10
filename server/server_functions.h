@@ -20,3 +20,17 @@ char* f2(float a, double b);             /* return: OUT string; a, b: IN */
 void f3(long a[]);                       /* a: INOUT array */
 
 void f4(char a[]);                       /* a: IN array */
+
+int f5();
+
+int f6(int a);
+
+int f7 (int a[]);
+
+double f8(double a, double b);
+
+float f9(float a, float b);
+
+
+long f10(long a, long b);
+int f11(int a, int b, int c, int d);

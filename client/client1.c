@@ -1,4 +1,4 @@
-/*
+/*:
  * client.c
  * 
  * This file is the client program, 
@@ -14,6 +14,24 @@
 #define CHAR_ARRAY_LENGTH 100
 
 int main(int argc, char ** argv) {
+  
+  long a10 = 0;
+  long b10 = 0;
+  int count10 = 3;
+  long return10;
+  int argTypes10[count10 + 1];
+  void **args10;
+
+  argTypes10[0] = (1 << ARG_OUTPUT) | (ARG_LONG << 16);
+  argTypes10[1] = (1 << ARG_INPUT) | (ARG_LONG << 16);
+  argTypes10[2] = (1 << ARG_INPUT) | (ARG_LONG << 16);
+  argTypes10[3] = 0;
+
+  args10 = (void **)malloc(count10 * sizeof(void *));
+  args10[0] = (void *)&return10;
+  args10[1] = (void *)&a10;
+  args10[2] = (void *)&b10;
+
 
   /* prepare the arguments for f0 */
   int a0 = 5;
@@ -32,6 +50,71 @@ int main(int argc, char ** argv) {
   args0[0] = (void *)&return0;
   args0[1] = (void *)&a0;
   args0[2] = (void *)&b0;
+
+
+  int argTypes5[2];
+  void ** args5;
+  int return5;
+  argTypes5[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
+  argTypes5[1] = 0;
+  args5 = (void **)malloc(1 * sizeof(void *));
+  args5[0] = (void *)&return5;
+ 
+
+  int argTypes8[4];
+  void ** args8;
+  double a8 = 10;
+  double b8 = 10;
+  double return8;
+    argTypes8[0] = (1 << ARG_OUTPUT) | (ARG_DOUBLE << 16);
+  argTypes8[1] = (1 << ARG_INPUT) | (ARG_DOUBLE << 16);
+  argTypes8[2] = (1 << ARG_INPUT) | (ARG_DOUBLE << 16);
+  argTypes8[3] = 0;
+  args8 = (void **)malloc(3 * sizeof(void *));
+  args8[0] = (void *)&return8;
+  args8[1] = (void *)&a8;
+  args8[2] = (void *)&b8;
+
+
+    int argTypes9[4];
+  void ** args9;
+  float a9 = 15;
+  float b9 = 10;
+  double return9;
+    argTypes9[0] = (1 << ARG_OUTPUT) | (ARG_FLOAT << 16);
+  argTypes9[1] = (1 << ARG_INPUT) | (ARG_FLOAT << 16);
+  argTypes9[2] = (1 << ARG_INPUT) | (ARG_FLOAT << 16);
+  argTypes9[3] = 0;
+  args9 = (void **)malloc(3 * sizeof(void *));
+  args9[0] = (void *)&return9;
+  args9[1] = (void *)&a9;
+  args9[2] = (void *)&b9;
+
+
+  int argTypes6[3];
+  void ** args6;
+  int return6;
+  int a6 = 5;
+  argTypes6[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
+  argTypes6[1] = (1 << ARG_INPUT) | (ARG_INT << 16);
+  argTypes6[2] = 0;
+  args6 = (void **) malloc(2 * sizeof(void *));
+  args6[0] = (void *)&return6;
+  args6[1] = (void *)&a6;
+
+  int argTypes7[3];
+  void ** args7;
+   int return7;
+   argTypes7[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
+   argTypes7[1] = (1 << ARG_INPUT) | (ARG_INT << 16) | 3;
+  argTypes7[2] = 0;
+   args7 = (void **)malloc(2 * sizeof(void *));
+
+  int a7[3] = {2,2,3};
+  args7[0] = (void *)&return7;
+  args7[1] = (void *)a7;
+  
+
 
   /* prepare the arguments for f1 */
   char a1 = 'a';
@@ -56,6 +139,33 @@ int main(int argc, char ** argv) {
   args1[2] = (void *)&b1;
   args1[3] = (void *)&c1;
   args1[4] = (void *)&d1;
+  
+
+  int a11 = 100;
+  int b11 = 100;
+  int c11 = 100;
+  int d11 = 100;
+  int count11 = 5;
+  int return11;
+  int argTypes11[count11 + 1];
+  void **args11;
+
+  argTypes11[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
+  argTypes11[1] = (1 << ARG_INPUT) | (ARG_INT << 16);
+  argTypes11[2] = (1 << ARG_INPUT) | (ARG_INT << 16);
+  argTypes11[3] = (1 << ARG_INPUT) | (ARG_INT << 16);
+  argTypes11[4] = (1 << ARG_INPUT) | (ARG_INT << 16);
+  argTypes11[5] = 0;
+
+  args11 = (void **)malloc(count11 * sizeof(void *));
+  args11[0] = (void *)&return11;
+  args11[1] = (void *)&a11;
+  args11[2] = (void *)&b11;
+  args11[3] = (void *)&c11;
+  args11[4] = (void *)&d11;
+
+
+
     
   /* prepare the arguments for f2 */
   float a2 = 3.14159;
@@ -101,7 +211,6 @@ int main(int argc, char ** argv) {
 
   /* rpcCalls */
   int s0 = rpcCall("f0", argTypes0, args0);
-  /* test the return f0 */
   printf("\nEXPECTED return of f0 is: %d\n", a0 + b0);
   if (s0 >= 0) { 
     printf("ACTUAL return of f0 is: %d\n", *((int *)(args0[0])));
@@ -109,8 +218,67 @@ int main(int argc, char ** argv) {
   else {
     printf("Error: %d\n", s0);
   }
+   int s5 = rpcCall ("f5", argTypes5, args5);
+   printf("\nEXPECTED return of f5 is: %d\n", 1);
+  if (s5 >= 0) {
+    printf("ACTUAL return of f5 is: %d\n", *((int *)(args5[0])));
+  }
+  else {
+    printf("Error: %d\n", s5);
+  }
+   int s6 = rpcCall ("f6", argTypes6, args6);
+  printf("\nEXPECTED return of f6 is: %d\n", 5);
+  if (s6 >= 0) {
+    printf("ACTUAL return of f6 is: %d\n", *((int *)(args6[0])));
+  }
+  else {
+    printf("Error: %d\n", s6);
+  }
+
+
+/*  int s7 = rpcCall("f7", argTypes7, args7);
+  // test the return of f3
+  printf(
+    "\nEXPECTED return of f7 is: 5\n"
+  );
+
+  if (s7 >= 0) {
+    printf("ACTUAL return of f7 is: %d\n", *((int *)(args7[0])));
+  }
+  else {
+    printf("Error: %d\n", s7);
+  }*/
+
+
+   int s8 = rpcCall ("f8", argTypes8, args8);
+  printf("\nEXPECTED return of f8 is: %d\n", 20);
+  if (s8 >= 0) {
+    printf("ACTUAL return of f8 is: %lf\n", *((double *)(args8[0])));
+  }
+  else {
+    printf("Error: %d\n", s8);
+  }
 
   
+   int s9 = rpcCall ("f9", argTypes9, args9);
+  printf("\nEXPECTED return of f9 is: %d\n", 25);
+  if (s9 >= 0) {
+    printf("ACTUAL return of f9 is: %f\n", *((float *)(args9[0])));
+  }
+  else {
+    printf("Error: %d\n", s9);
+  }
+
+     int s10 = rpcCall ("f10", argTypes10, args10);
+  printf("\nEXPECTED return of f10 is: %d\n", 0);
+  if (s10 >= 0) {
+    printf("ACTUAL return of f10 is: %f\n", *((float *)(args10[0])));
+  }
+  else {
+    printf("Error: %d\n", s10);
+  }
+  
+
   int s1 = rpcCall("f1", argTypes1, args1);
   // test the return of f1
   printf("\nEXPECTED return of f1 is: %ld\n", a1 + b1 * c1 - d1);
@@ -132,7 +300,36 @@ int main(int argc, char ** argv) {
     printf("Error: %d\n", s2);
   }
 
+ s1 = rpcCall("f1", argTypes1, args1);
+  // test the return of f1
+  printf("\nEXPECTED return of f1 is: %ld\n", a1 + b1 * c1 - d1);
+  if (s1 >= 0) {
+    printf("ACTUAL return of f1 is: %ld\n", *((long *)(args1[0])));
+  }
+  else {
+    printf("Error: %d\n", s1);
+  }
 
+   int s11 = rpcCall("f11", argTypes11, args11);
+  // test the return of f1
+  printf("\nEXPECTED return of f11 is: %d\n", a11 + b11 + c11 + d11);
+  if (s11 >= 0) {
+    printf("ACTUAL return of f11 is: %d\n", *((int *)(args11[0])));
+  }
+  else {
+    printf("Error: %d\n", s11);
+  }
+
+
+
+  s0 = rpcCall("f0", argTypes0, args0);
+  printf("\nEXPECTED return of f0 is: %d\n", a0 + b0);
+ if (s0 >= 0) {
+    printf("ACTUAL return of f0 is: %d\n", *((int *)(args0[0])));
+  }
+  else {
+    printf("Error: %d\n", s0);
+  }
   int s3 = rpcCall("f3", argTypes3, args3);
   // test the return of f3 
   printf(

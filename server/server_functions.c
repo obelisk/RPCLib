@@ -9,12 +9,26 @@ int f0(int a, int b) {
 
   return a + b;
 }   
+double f8 (double a, double b){ 
+	return a + b;
+}
+float f9 (float a, float b){
+        return a + b;
+}
+long f10 (long a, long b){
+        return a + b;
+}
 
 
 /* returns: OUT; a, b, c, d: IN */
 long f1(char a, short b, int c, long d) {
 
   return a + b * c - d;
+}
+
+int f11(int a, int b, int c, int d) {
+
+  return a + b + c + d;
 }
 
 
@@ -39,7 +53,13 @@ char* f2(float a, double b) {
   return str1;
 }
 
-
+int f5() { 
+	return 1;
+}
+int f6(int a) {
+	printf("%d\n", a); 
+	return a;
+}
 /* 
  * bubble sort
  * the first element in the array indicates the size of the array
@@ -70,4 +90,14 @@ void f3(long a[]) {
 void f4(char a[]) {
 
   /* print file a to a printer */
+}
+
+int f7(int a[]){ 
+	int size = a[0];
+	printf("test value %d\n", size);
+	int sum = 0;
+	for (int i = 0; i < size; i++) {
+		sum += a[i];
+	}
+	return sum;
 }
