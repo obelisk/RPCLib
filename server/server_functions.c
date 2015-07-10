@@ -50,7 +50,6 @@ char* f2(float a, double b) {
   float ai;
   double bi;
   char *str1;
-  char *str2;
 
   a = modff(a, &ai);
   b = modf(b, &bi);
@@ -66,7 +65,6 @@ int f5() {
 	return 1;
 }
 int f6(int a) {
-	printf("%d\n", a); 
 	return a;
 }
 /* 
@@ -103,7 +101,6 @@ void f4(char a[]) {
 
 void f7(char a[]){ 
 	int size = 0;
-       	printf("FUNCTION PRIOR: %s\n", a);
 	while (a[size]) { 
 		size++;
 	} 
