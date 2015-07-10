@@ -53,7 +53,7 @@ release:
 	# Clean
 	rm release/*.o
 	# Binder
-	clang++ -Iinclude -Wall -o release/binder binder/binder.cc release/librpc.a
+	clang++ -Iinclude -Lrelease -Wall -lrpc -o release/binder binder/binder.cc
 	# Copy Header
 	cp include/rpc.h release/rpc.h
 
