@@ -579,7 +579,26 @@ int rpcRegister(char *name, int *argTypes, skeleton f) {
 		written += result;
 	}
 	// Return number of bytes written
-	
+	char registerToken[2];
+        readNBytes(bindDescriptor, 2, registerToken);
+	if (registerToken[0] == REGISTER_SUCCESS)  {
+		if (VERBOSE_OUTPUT == 1) {
+			if (registerToken[1] == REGISTER_WELCOME) { 
+                		printf("Joined Distributed System\n");
+			}
+			else { 
+				printf("Registered New Function\n");
+			}
+                }
+
+	} else if (registerToken[0] == REGISTER_FAILURE ){ 
+		if (registerToken[1] == REGISTER_EXISTS) { 
+			printf("Function Already Registered\n");
+		}
+		else { 
+			printf("Server Returned Code: %d\n", (int)registerToken[1]);
+		}
+	}
 
 	return written;
 }

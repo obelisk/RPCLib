@@ -127,6 +127,8 @@ int main(int argc, char *argv[]) {
   char f12_write_file[] = "f12-write_file";
   char f13_sum_int_arr[] = "f13-sum_int_arr"; 
 	rpcRegister(f0_sum_scale, argTypes0, *f0_Skel);
+	rpcRegister(f0_sum_scale, argTypes0, *f0_Skel);
+
 	rpcRegister(f1_multi_math, argTypes1, *f1_Skel);
 	rpcRegister(f2_num_concat, argTypes2, *f2_Skel);
 	rpcRegister(f3_bubble_sort, argTypes3, *f3_Skel);
