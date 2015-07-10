@@ -14,7 +14,9 @@
 #define CHAR_ARRAY_LENGTH 100
 
 int main(int argc, char **argv) {
-
+	int argTypesDNE[2];
+	void **argsDNE =NULL;
+	
 	int a0 = 5;
 	int b0 = 10;
 	int count0 = 3;
@@ -205,6 +207,7 @@ int main(int argc, char **argv) {
   args13[0] = (void *)&return13;
   args13[1] = (void *)b13;
     // Declare Function Names
+    char dne[] = "dne";
     char f0_sum_scale[] = "f0-sum-scale";
     char f1_multi_math[] = "f1-multi-math";
     char f2_num_concat[] = "f2-num-concat";
@@ -220,6 +223,15 @@ int main(int argc, char **argv) {
     char f12_write_file[] = "f12-write_file";
     char f13_sum_int_arr[] = "f13-sum_int_arr";
 	// rpcCalls
+
+           int sDNE = rpcCall(dne, argTypesDNE, argsDNE);
+        printf("\nEXPECTED return of DNE is: %d\n", -1);
+        if (sDNE >= 0) {
+                printf("ACTUAL return of DNE is: %d\n", *((int *)(argsDNE[0])));
+        } else {
+                printf("Error: %d\n", sDNE);
+        }
+
 	int s0 = rpcCall(f0_sum_scale, argTypes0, args0);
 	printf("\nEXPECTED return of f0 is: %d\n", a0 + b0);
 	if (s0 >= 0) {

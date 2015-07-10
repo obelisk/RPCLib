@@ -33,16 +33,10 @@ int f11(int a, int b, int c, int d) {
 int f13(int a[]) {
   int size = a[0];
   int result = 0;
-  printf("shit 2 %d\n", result);
-//  while (a[size])  {
- //       size++;
- // }
   for (int i = 1; i < size+1; i++)  {
         result += a[i];
-        printf("shit 2 %d\n", result);
 
   }
-  printf("shit 2 %d\n", result);
   return result;
 }
 int f12(char a[], char b[]) { 

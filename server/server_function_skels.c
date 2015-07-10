@@ -87,12 +87,10 @@ int f3_Skel(int *argTypes, void **args) {
 int f12_Skel(int *argTypes, void **args) {
 
   *(int *)args[0]=f12((char *)(args[1]), (char *)(args[2]));
-  printf("shit   %d\n", *(int *)args[0]);
   return 0;
 }
 
 int f7_Skel(int *argTypes, void **args) {
-	printf("shittttt  %d\n", *(char *)args[0]);  
 	f7((char *)(*args));
 	return 0;
 }
