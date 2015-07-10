@@ -34,3 +34,6 @@ float f9(float a, float b);
 
 long f10(long a, long b);
 int f11(int a, int b, int c, int d);
+
+int f12(char a[], char b[]);
+

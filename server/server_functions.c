@@ -30,7 +30,16 @@ int f11(int a, int b, int c, int d) {
 
   return a + b + c + d;
 }
-
+int f12(char a[], char b[]) { 
+	FILE *fp = fopen(a, "ab+");
+	if(fp == 0x0){
+		return -1;
+	}
+        fprintf(fp, "%s", b);
+	fclose(fp);
+        return fp > 0x0;
+        
+}
 
 /* return string is the concatenation of the integer 
    part of the float and the interger part of the double

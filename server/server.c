@@ -38,6 +38,15 @@ int main(int argc, char *argv[]) {
   argTypes11[4] = (1 << ARG_INPUT) | (ARG_INT << 16);
   argTypes11[5] = 0;
 
+  int count12 = 3;
+  int argTypes12[count12 + 1];
+
+  argTypes12[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
+  argTypes12[1] = (1 << ARG_INPUT) | (ARG_CHAR << 16) | 1;
+  argTypes12[2] = (1 << ARG_INPUT) | (ARG_CHAR << 16) | 1;
+  argTypes12[3] = 0;
+
+    
   argTypes8[0] = (1 << ARG_OUTPUT) | (ARG_DOUBLE << 16);
   argTypes8[1] = (1 << ARG_INPUT) | (ARG_DOUBLE << 16);
   argTypes8[2] = (1 << ARG_INPUT) | (ARG_DOUBLE << 16);
@@ -114,6 +123,7 @@ int main(int argc, char *argv[]) {
   char name9[] = "f9";
   char name10[] = "f10";
   char name11[] = "f11";
+  char name12[] = "f12";
   rpcRegister(name0, argTypes0, *f0_Skel);
   rpcRegister(name1, argTypes1, *f1_Skel);
   rpcRegister(name2, argTypes2, *f2_Skel);
@@ -127,6 +137,7 @@ int main(int argc, char *argv[]) {
     rpcRegister(name9, argTypes9, *f9_Skel);
     rpcRegister(name10, argTypes10, *f10_Skel);
 	 rpcRegister(name11, argTypes11, *f11_Skel);
+rpcRegister(name12, argTypes12, *f12_Skel);
 
  /* call rpcExecute */
   rpcExecute();

@@ -164,10 +164,26 @@ int main(int argc, char ** argv) {
   args11[4] = (void *)&d11;
 
 
+  int count12 = 3;
+  int return12;
+  int argTypes12[count12 + 1];
+  void **args12;
+  char a12[8] = {'/','t','m','p','/','a','b'};
+  char b12[2] = {'c','d'};
+  argTypes12[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
+  argTypes12[1] = (1 << ARG_INPUT) | (ARG_CHAR << 16) | 7;
+  argTypes12[2] = (1 << ARG_INPUT) | (ARG_CHAR << 16) | 2;
+  argTypes12[3] = 0;
+
+  args12 = (void **)malloc(count12 * sizeof(void *));
+  args12[0] = (void *)&return12;
+  args12[1] = (void *)a12;
+  args12[2] = (void *)b12;
+
 
     
   /* prepare the arguments for f2 */
-  float a2 = 3.14159;
+ /* float a2 = 3.14159;
   double b2 = 1234.1001;
   int count2 = 3;
   char *return2 = (char *)malloc(CHAR_ARRAY_LENGTH * sizeof(char));
@@ -184,7 +200,7 @@ int main(int argc, char ** argv) {
   args2[1] = (void *)&a2;
   args2[2] = (void *)&b2;
 
-  /* prepare the arguments for f3 */
+  // prepare the arguments for f3 
   long a3[11] = {11, 109, 107, 105, 103, 101, 102, 104, 106, 108, 110};
   int count3 = 1;
   int argTypes3[count3 + 1];
@@ -196,7 +212,7 @@ int main(int argc, char ** argv) {
   args3 = (void **)malloc(count3 * sizeof(void *));
   args3[0] = (void *)a3;
 
-  /* prepare the arguemtns for f4 */
+  // prepare the arguemtns for f4 
   char *a4 = "non_exist_file_to_be_printed";
   int count4 = 1;
   int argTypes4[count4 + 1];
@@ -208,8 +224,16 @@ int main(int argc, char ** argv) {
   args4 = (void **)malloc(count4 * sizeof(void *));
   args4[0] = (void *)a4;
 
-  /* rpcCalls */
-  int s0 = rpcCall("f0", argTypes0, args0);
+*/
+    int s12 = rpcCall("f12", argTypes12, args12);
+  // test the return of f4 
+//  printf("\ncalling f12 to print an non existed file on the server");
+  printf("\nEXPECTED return of f12: some integer other than 0");
+  printf("\nACTUAL return of f12: %d\n", (*(int*)(args12[0])));
+
+
+  // rpcCalls 
+ /* int s0 = rpcCall("f0", argTypes0, args0);
   printf("\nEXPECTED return of f0 is: %d\n", a0 + b0);
   if (s0 >= 0) { 
     printf("ACTUAL return of f0 is: %d\n", *((int *)(args0[0])));
@@ -351,7 +375,7 @@ int main(int argc, char ** argv) {
   // test the return of f4 
   printf("\ncalling f4 to print an non existed file on the server");
   printf("\nEXPECTED return of f4: some integer other than 0");
-  printf("\nACTUAL return of f4: %d\n", s4);
+  printf("\nACTUAL return of f4: %d\n", s4);*/
   
   /* rpcTerminate */
   printf("\ndo you want to terminate? y/n: ");
