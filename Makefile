@@ -1,4 +1,10 @@
-.PHONY: library release
+.PHONY: ready library release
+
+ready:
+	-mkdir build
+	-mkdir release
+
+-include ready
 
 clean:
 	-rm -rf build/*
