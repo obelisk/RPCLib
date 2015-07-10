@@ -196,9 +196,9 @@ int main(int argc, char **argv) {
   int return13;
   int argTypes13[count13 + 1];
   void **args13;
-  int b13[2] = {2,3};
+  int b13[3] = {2, 2,3};
   argTypes13[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
-  argTypes13[1] = (1 << ARG_INPUT) | (ARG_INT << 16) | 2;
+  argTypes13[1] = (1 << ARG_INPUT) | (ARG_INT << 16) | 3;
   argTypes13[2] = 0;
 
   args13 = (void **)malloc(count13 * sizeof(void *));
@@ -288,7 +288,7 @@ int main(int argc, char **argv) {
 	printf("\nEXPECTED return of f7 is: ba\n");
 
 	if (s7 >= 0) {
-		printf("ACTUAL return of f7 is: %c %c\n", *(((char *)args7[0]) + 0), *(((char *)args7[0]) + 1));
+		printf("ACTUAL return of f7 is: %c%c\n", *(((char *)args7[0]) + 0), *(((char *)args7[0]) + 1));
 	} else {
 		printf("Error: %d\n", s7);
 	}

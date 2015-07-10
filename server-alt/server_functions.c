@@ -9,6 +9,15 @@ int f0(int a, int b) {
 
   return a + b;
 }   
+double f8 (double a, double b){ 
+	return a + b;
+}
+float f9 (float a, float b){
+        return a + b;
+}
+long f10 (long a, long b){
+        return a + b;
+}
 
 
 /* returns: OUT; a, b, c, d: IN */
@@ -17,6 +26,35 @@ long f1(char a, short b, int c, long d) {
   return a + b * c - d;
 }
 
+int f11(int a, int b, int c, int d) {
+
+  return a + b + c + d;
+}
+int f13(int a[]) {
+  int size = a[0];
+  int result = 0;
+  printf("shit 2 %d\n", result);
+//  while (a[size])  {
+ //       size++;
+ // }
+  for (int i = 1; i < size+1; i++)  {
+        result += a[i];
+        printf("shit 2 %d\n", result);
+
+  }
+  printf("shit 2 %d\n", result);
+  return result;
+}
+int f12(char a[], char b[]) { 
+	FILE *fp = fopen(a, "ab+");
+	if(fp == 0x0){
+		return -1;
+	}
+        fprintf(fp, "%s", b);
+	fclose(fp);
+        return fp > 0x0;
+        
+}
 
 /* return string is the concatenation of the integer 
    part of the float and the interger part of the double
@@ -27,7 +65,6 @@ char* f2(float a, double b) {
   float ai;
   double bi;
   char *str1;
-  char *str2;
 
   a = modff(a, &ai);
   b = modf(b, &bi);
@@ -39,7 +76,12 @@ char* f2(float a, double b) {
   return str1;
 }
 
-
+int f5() { 
+	return 1;
+}
+int f6(int a) {
+	return a;
+}
 /* 
  * bubble sort
  * the first element in the array indicates the size of the array
@@ -70,4 +112,17 @@ void f3(long a[]) {
 void f4(char a[]) {
 
   /* print file a to a printer */
+}
+
+void f7(char a[]){ 
+	int size = 0;
+	while (a[size]) { 
+		size++;
+	} 
+	for (int i = 0; i < size/2; ++i) {
+		char temp = a[size-1 - i];
+		a[size-1-i] = a[i];
+                a[i] = temp;
+	}
+	printf("FUNCTION: %s\n", a);
 }

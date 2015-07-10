@@ -28,7 +28,7 @@ server: build/librpc.a
 server-alt: build/librpc.a
 	-rm build/server-alt
 	-rm -rf build/server-alt.dSYM
-	clang++ -Iinclude -Wall -g -o build/server-alt server-alt/server.c server-alt/server_function_skels.c server-alt/server_functions.c build/librpc.a
+	clang++ -Iinclude -pthread -Wall -g -o build/server-alt server-alt/server.c server-alt/server_function_skels.c server-alt/server_functions.c build/librpc.a
 
 binder: build/librpc.a
 	-rm build/binder
