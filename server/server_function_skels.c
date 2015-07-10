@@ -84,7 +84,7 @@ int f7_Skel(int *argTypes, void **args) {
  */
 int f4_Skel(int *argTypes, void **args) {
 
-  return 0; /* can not print the file */
+  return -1; /* can not print the file */
 }
 
 int f5_Skel(int *argTypes, void **args) { 
