@@ -126,19 +126,20 @@ int main(int argc, char *argv[]) {
   char f11_four_int_sum[] = "f11-four_int_sum";
   char f12_write_file[] = "f12-write_file";
   char f13_sum_int_arr[] = "f13-sum_int_arr"; 
-//	rpcRegister(f0_sum_scale, argTypes0, *f0_Skel);
+	rpcRegister(f0_sum_scale, argTypes0, *f0_Skel);
+        rpcRegister(f0_sum_scale, argTypes0, *f0_Skel);
 	rpcRegister(f1_multi_math, argTypes1, *f1_Skel);
-//	rpcRegister(f2_num_concat, argTypes2, *f2_Skel);
+	rpcRegister(f2_num_concat, argTypes2, *f2_Skel);
 	rpcRegister(f3_bubble_sort, argTypes3, *f3_Skel);
-//	rpcRegister(f4_fail_test, argTypes4, *f4_Skel);
+	rpcRegister(f4_fail_test, argTypes4, *f4_Skel);
 	rpcRegister(f5_success_test, argTypes5, *f5_Skel);
-//	rpcRegister(f6_int_echo, argTypes6, *f6_Skel);
+	rpcRegister(f6_int_echo, argTypes6, *f6_Skel);
 	rpcRegister(f7_reverse_string, argTypes7, *f7_Skel);
-//	rpcRegister(f8_double_sum, argTypes8, *f8_Skel);
+	rpcRegister(f8_double_sum, argTypes8, *f8_Skel);
 	rpcRegister(f9_float_sum, argTypes9, *f9_Skel);
-//	rpcRegister(f10_long_sum, argTypes10, *f10_Skel);
+	rpcRegister(f10_long_sum, argTypes10, *f10_Skel);
 	rpcRegister(f11_four_int_sum, argTypes11, *f11_Skel);
-//	rpcRegister(f12_write_file, argTypes12, *f12_Skel);
+	rpcRegister(f12_write_file, argTypes12, *f12_Skel);
         rpcRegister(f13_sum_int_arr, argTypes13, *f13_Skel);
 
 	/* call rpcExecute */

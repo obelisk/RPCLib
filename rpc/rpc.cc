@@ -579,6 +579,8 @@ int rpcRegister(char *name, int *argTypes, skeleton f) {
 		written += result;
 	}
 	// Return number of bytes written
+	
+
 	return written;
 }
 
