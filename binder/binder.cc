@@ -287,14 +287,22 @@ int main(int argc, char **argv) {
 						}
 						int have_function = addFunction(ip, server_port, new_function);
 
-						if (VERBOSE_OUTPUT == 1) {
-							if (have_function == NEW_SERVER) {
-								printf("\tStatus: Added a new function to a new server.\n\n");
-							} else if (have_function == NEW_FUNCTION) {
-								printf("\tStatus: Added a new function to an old server.\n\n");
-							} else if (have_function == RE_REGISTER) {
-								printf("\tStatus: Server already has this function.\n\n");
-							}
+						char status[2];
+						if (have_function == NEW_SERVER) {
+							if (VERBOSE_OUTPUT == 1) { printf("\tStatus: Added a new function to a new server.\n\n");}
+							status[0] = REGISTER_SUCCESS;
+							status[1] = REGISTER_WELCOME;
+							write(des, status, 2);
+						} else if (have_function == NEW_FUNCTION) {
+							if (VERBOSE_OUTPUT == 1) { printf("\tStatus: Added a new function to an old server.\n\n");}
+							status[0] = REGISTER_SUCCESS;
+							status[1] = REGISTER_F_ADD;
+							write(des, status, 2);
+						} else if (have_function == RE_REGISTER) {
+							if (VERBOSE_OUTPUT == 1) { printf("\tStatus: Server already has this function.\n\n");}
+							status[0] = REGISTER_FAILURE;
+							status[1] = REGISTER_EXISTS;
+							write(des, status, 2);
 						}
 					} else if (call_type == RPC_CALL) {
 						// Read Length of Name

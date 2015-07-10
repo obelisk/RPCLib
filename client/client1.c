@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
     char f3_bubble_sort[] = "f3-bubble-sort";
     char f4_fail_test[] = "f4-fail_test";
     char f5_success_test[] = "f5-success_test";
-    char f6_int_echo[] = "f5-int_echo";
+    char f6_int_echo[] = "f6-int_echo";
     char f7_reverse_string[] = "f7-reverse_string";
     char f8_double_sum[] = "f8-double_sum";
     char f9_float_sum[] = "f9-float_sum";
