@@ -5,45 +5,31 @@
 int f0_Skel(int *argTypes, void **args) {
 
   *(int *)args[0] = f0(*(int *)args[1], *(int *)args[2]);
-  printf("Params %d, %d\n", *(int *)args[1], *(int *)args[2]);
   return 0;
 }
 int f8_Skel(int *argTypes, void **args){
-   printf ("%lf\n", *(double *)args[1]); 
   *(double *)args[0] = f8(*(double *)args[1], *(double*)args[2]);
-   printf("Params %f, %f\n", *(double *)args[1], *(double *)args[2]);
-   printf ("%lf\n", *(double *)args[0]);
 
    return 0;
 
 }
 
 int f13_Skel(int *argTypes, void **args){
- //  printf ("%lf\n", *(double *)args[1]);
   *(int *)args[0] = f13((int *)args[1]);
-//   printf("Params %f, %f\n", *(double *)args[1], *(double *)args[2]);
- //  printf ("%lf\n", *(double *)args[0]);
-
    return 0;
 
 }
 
 
 int f9_Skel(int *argTypes, void **args){
-//   printf ("%lf\n", *(double *)args[1]);
   *(float *)args[0] = f9(*(float *)args[1], *(float*)args[2]);
- //  printf("Params %f, %f\n", *(double *)args[1], *(double *)args[2]);
- //  printf ("%lf\n", *(double *)args[0]);
 
    return 0;
 
 }
 
 int f10_Skel(int *argTypes, void **args){
- //  printf ("%lf\n", *(double *)args[1]);
   *(long *)args[0] = f10(*(long *)args[1], *(long*)args[2]);
-//   printf("Params %f, %f\n", *(double *)args[1], *(double *)args[2]);
- //  printf ("%lf\n", *(double *)args[0]);
 
    return 0;
 

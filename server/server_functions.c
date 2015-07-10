@@ -118,5 +118,4 @@ void f7(char a[]){
 		a[size-1-i] = a[i];
                 a[i] = temp;
 	}
-	printf("FUNCTION: %s\n", a);
 }

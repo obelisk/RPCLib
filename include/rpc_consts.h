@@ -4,7 +4,7 @@
 #define RPC_EXECUTE		0x3
 #define RPC_FAILURE		0x4
 
-#define VERBOSE_OUTPUT 	1
+#define VERBOSE_OUTPUT 	0
 
 #define INPUT_BIT 	0x80000000
 #define OUTPUT_BIT 	0x40000000
