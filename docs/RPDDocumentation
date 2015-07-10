@@ -1,0 +1,71 @@
+
+RPCCAPP:
+
+The function would first do a init and connect to the binder. Then it would
+generate a char array representing the function it wishes to call. The
+format of the char array is:
+
+Char Call_Type: which is a char indicating what type the type of call 
+Int length: which indicates the length of the function name
+Char * name: storing the actual name
+Int ArgTypesLength: indicates the size of argTypes
+Int *ArgTypes : actual argTypes
+
+This message will then be sent to the binder, where the binder will do a 
+lookup based on this char array and return the hostname and port of the 
+server with this function to the client, if there isnt it would reply with 
+a failure message and the client closes.
+
+After receiving the hostname and port, the client would try to connect to 
+the server and create the exact the same message as the one that was sent 
+to the binder EXCEPT that this time the void** args will be sent as well. 
+So for this part we have to first compute the length of the void** args. 
+This is achieved by looking of the type and length from the argTypes array 
+and summing it up. After this is done, the void ** args will be memcpy and 
+the entire message will be sent to the server.
+
+The RPC_CALL will then be waiting for the server to reply with the response. 
+If the server return a failure message then the client would return -1 and close. 
+If it was sucessful, the RPC_CALL would read the resulting void ** args into a char
+ buffer and what that is done, it will overwrite the existing void** args and return.
+
+RPC_CACHECALL:
+NOT IMPLEMENTED
+
+RPC_REGISTER:
+Similar to the RPC_CALL, RPC_REGISTER will create a char array storing the function 
+data and send it to the binder. The format of this mesage is
+
+Char call_type: RPC_REGISTER
+Int port: Server port information
+Int length: length of function name
+Char * name: actual function name
+Int size: size of argsarray
+Int * : actual  Argsarray
+
+For the skeleton part, it will be stored in a MAP with the key being the function name and the argTypes, however the length in argTypes if its greater than 1 it would all be set to 1. This key will later be used to do a lookup to find the correct skeleton in the map. 
+
+The entire char array will then be sent to the binder for registering. 
+
+
+
+RPC_EXECUTE:
+
+The RPC_EXECUTE acts like a server for to process incoming client requests. The first thing it does it is it calls listen(sd, 5) where sd is the server descriptor and then similar to what I've done in assignment 2, I create a FD_MASTER to store the connections and use select to multiplex. 
+
+When a new connection comes in, I check the call_type, if is a terminate. I close the server and set FD_MASTER to zero. If the call is from RPC_CALL. I generate the argTypes and args. I then put these two things in a structure, which will be passed as arguments in a pthread function. The pthread function is responsible for running the skeleton function and sending the response. It will first generate a key for the map and try to find the skeleton inside the map. Once it has been found, it will pass the two arguments into the skeleton. Then it will generate the response message and send it to client. The response format consists: 
+
+Char type: rpc type
+int length : length of name
+char * : func name
+int argsArray : size of argsArray
+int * : actual Argsarray
+
+After the response is sent the pthread will exit.
+
+
+RPC_TERMINATE:
+It will first try to connect to the binder, and then send a char consisting of the RPC_TYPE(RPC_TERMINATE) to the binder. Then the binder will send the terminate signal to all servers.
+
+
+

@@ -36,4 +36,4 @@ long f10(long a, long b);
 int f11(int a, int b, int c, int d);
 
 int f12(char a[], char b[]);
-
+int f13(int a[]);

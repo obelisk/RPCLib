@@ -30,6 +30,18 @@ int f11(int a, int b, int c, int d) {
 
   return a + b + c + d;
 }
+int f13(int a[]) {
+  int size = 0;
+  int result = 0;
+  while (a[size])  {
+        size++;
+  }
+  for (int i = 0; i < size; i++)  {
+        result += a[i];
+  }
+  printf("shit 2 %d\n", result);
+  return result;
+}
 int f12(char a[], char b[]) { 
 	FILE *fp = fopen(a, "ab+");
 	if(fp == 0x0){

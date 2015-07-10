@@ -103,6 +103,12 @@ int main(int argc, char *argv[]) {
 
 	argTypes7[0] = (1 << ARG_OUTPUT) | (1 << ARG_INPUT) | (ARG_CHAR << 16) | 1;
 	argTypes7[1] = 0;
+	      int count13 = 2;
+  int argTypes13[count13 + 1];
+   argTypes13[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
+  argTypes13[1] = (1 << ARG_INPUT) | (ARG_INT << 16) | 1;
+  argTypes13[2] = 0;
+
 	/*
 	 * register server functions f0~f4
 	 */
@@ -119,7 +125,7 @@ int main(int argc, char *argv[]) {
   char f10_long_sum[] = "f10-long_sum";
   char f11_four_int_sum[] = "f11-four_int_sum";
   char f12_write_file[] = "f12-write_file";
-  
+  char f13_sum_int_arr[] = "f13-sum_int_arr"; 
 	rpcRegister(f0_sum_scale, argTypes0, *f0_Skel);
 	rpcRegister(f1_multi_math, argTypes1, *f1_Skel);
 	rpcRegister(f2_num_concat, argTypes2, *f2_Skel);
@@ -133,6 +139,7 @@ int main(int argc, char *argv[]) {
 	rpcRegister(f10_long_sum, argTypes10, *f10_Skel);
 	rpcRegister(f11_four_int_sum, argTypes11, *f11_Skel);
 	rpcRegister(f12_write_file, argTypes12, *f12_Skel);
+        rpcRegister(f13_sum_int_arr, argTypes13, *f13_Skel);
 
 	/* call rpcExecute */
 	rpcExecute();

@@ -18,6 +18,17 @@ int f8_Skel(int *argTypes, void **args){
 
 }
 
+int f13_Skel(int *argTypes, void **args){
+ //  printf ("%lf\n", *(double *)args[1]);
+  *(int *)args[0] = f13((int *)args[1]);
+//   printf("Params %f, %f\n", *(double *)args[1], *(double *)args[2]);
+ //  printf ("%lf\n", *(double *)args[0]);
+
+   return 0;
+
+}
+
+
 int f9_Skel(int *argTypes, void **args){
 //   printf ("%lf\n", *(double *)args[1]);
   *(float *)args[0] = f9(*(float *)args[1], *(float*)args[2]);

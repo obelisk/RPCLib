@@ -17,3 +17,4 @@ int f9_Skel(int* a, void** b);
 int f10_Skel(int* a, void** b);
 int f11_Skel(int* a, void** b);
 int f12_Skel(int* a, void** b);
+int f13_Skel(int* a, void** b);

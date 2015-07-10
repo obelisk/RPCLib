@@ -190,6 +190,20 @@ int main(int argc, char **argv) {
 	args12[1] = (void *)a12;
 	args12[2] = (void *)b12;
 
+
+    
+  int count13 = 2;
+  int return13;
+  int argTypes13[count13 + 1];
+  void **args13;
+  int b13[2] = {2,3};
+  argTypes13[0] = (1 << ARG_OUTPUT) | (ARG_INT << 16);
+  argTypes13[1] = (1 << ARG_INPUT) | (ARG_INT << 16) | 2;
+  argTypes13[2] = 0;
+
+  args13 = (void **)malloc(count13 * sizeof(void *));
+  args13[0] = (void *)&return13;
+  args13[1] = (void *)b13;
     // Declare Function Names
     char f0_sum_scale[] = "f0-sum-scale";
     char f1_multi_math[] = "f1-multi-math";
@@ -204,7 +218,7 @@ int main(int argc, char **argv) {
     char f10_long_sum[] = "f10-long_sum";
     char f11_four_int_sum[] = "f11-four_int_sum";
     char f12_write_file[] = "f12-write_file";
-
+    char f13_sum_int_arr[] = "f13-sum_int_arr";
 	// rpcCalls
 	int s0 = rpcCall(f0_sum_scale, argTypes0, args0);
 	printf("\nEXPECTED return of f0 is: %d\n", a0 + b0);
@@ -318,6 +332,17 @@ int main(int argc, char **argv) {
     printf("\nEXPECTED return of f12: some integer other than 0");
     printf("\nACTUAL return of f12: %d\n", (*(int *)(args12[0])));
 
+             int s13 = rpcCall(f13_sum_int_arr, argTypes13, args13);
+  printf("\nEXPECTED return of f13: 5\n");
+  if (s13 >= 0) {
+    printf("ACTUAL return of f13 is: %d\n", *((int *)(args13[0])));
+  }
+  else {
+    printf("Error: %d\n", s13);
+  }
+
+
+
 	/* rpcTerminate */
 	printf("\ndo you want to terminate? y/n: ");
 	if (getchar() == 'y')
@@ -325,4 +350,5 @@ int main(int argc, char **argv) {
 
 	/* end of client.c */
 	return 0;
+
 }
