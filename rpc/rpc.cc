@@ -614,6 +614,9 @@ int rpcExecute() {
 	FD_ZERO(&read_fds);
 	FD_SET(serverDescriptor, &master);
 	fdmax = serverDescriptor;
+	if (myMap.size() == 0) { 
+		return 0;
+	}
 	for (;;) {
 		read_fds = master;
 		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {

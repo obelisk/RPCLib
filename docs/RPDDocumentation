@@ -1,5 +1,5 @@
 
-RPCCAPP:
+RPC_CALL:
 
 The function would first do a init and connect to the binder. Then it would
 generate a char array representing the function it wishes to call. The
@@ -45,7 +45,7 @@ Int * : actual  Argsarray
 
 For the skeleton part, it will be stored in a MAP with the key being the function name and the argTypes, however the length in argTypes if its greater than 1 it would all be set to 1. This key will later be used to do a lookup to find the correct skeleton in the map. 
 
-The entire char array will then be sent to the binder for registering. 
+The entire char array will then be sent to the binder for registering. The server will then wait for a response from the binder and output if its duplicating registering the same function.
 
 
 
