@@ -333,7 +333,6 @@ int rpcCall(char *name, int *argTypes, void **args) {
 	result2 = readNBytes(bindDescriptor, 4, hostnameLength);
 	int hlength;
 	arrToInt(&hlength, hostnameLength);
-	// This needs to be freed
 	hostname = (char *)malloc((hlength + 1) * sizeof(char));
 	hostname[hlength] = '\0';
 	result2 = readNBytes(bindDescriptor, hlength, hostname);
@@ -357,6 +356,7 @@ int rpcCall(char *name, int *argTypes, void **args) {
 		perror("Connection Failure");
 		return -1;
 	}
+	free(hostname);
 	int callMsgSize = 0;
 	callMsgSize += sizeof(char);
 	callMsgSize += sizeof(int);
@@ -493,6 +493,7 @@ int rpcCall(char *name, int *argTypes, void **args) {
 			if (readNBytes(s, paramSize[x], temp_buffer) == -1) {
 				close(s);
 				printf("Connection closed while reading param data from server\n");
+				free(params);
 				return -1;
 			}
 			int test = 0;
@@ -500,7 +501,7 @@ int rpcCall(char *name, int *argTypes, void **args) {
 			memcpy(args[x], temp_buffer, paramSize[x]);
 		}
 	}
-
+	free(params);
 	return 0;
 }
 
@@ -739,6 +740,7 @@ int rpcExecute() {
 						if (bad == 1) {
 							printf("Cleaning up after failed read\n");
 							free(params);
+							free(tempArgsArray);
 							break;
 						}
 						if (VERBOSE_OUTPUT == 1) {
@@ -779,6 +781,7 @@ int rpcExecute() {
 							printf("Descriptor (?): %d\n", skel_args->i);
 							printf("Function Key: %s\n", skel_args->mapKey);
 						}
+						free(params);
 						pthread_create(&pth, NULL, skeletonThread, (void *)skel_args);
 					}
 				}
