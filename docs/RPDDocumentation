@@ -1,4 +1,9 @@
 
+
+Storing skeleton function:
+
+We decided to store the skeleton function in a map. Where the key will be basically the value of the int *ArgTypes array. However to handle situation where the agTypes[i] has length greater than 1, at RPC register we changed the length to 1. And when the server do a lookup to process the skeleton function, it will also set the argType length to be 1 when generating the key.
+
 RPC_CALL:
 
 The function would first do a init and connect to the binder. Then it would
