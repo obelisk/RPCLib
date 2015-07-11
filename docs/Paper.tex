@@ -28,12 +28,20 @@ This will compile all the executables into the build folder and they can be exec
 \newline\newline
 {\bf Notes on building}\newline
 For the purposes of understanding what is happening and marking, before any compilations, setting VERBOSE\_OUTPUT to 1 will enable many debugging output lines useful for understanding execution flow and steps taken.\newline\newline
-We also use clang++ for compilation and testing so this should also be during your use of this as well. Our make file is quite extensive on the flags required for compilation of clients and servers against the library and can be consulted as a guide if it is at all unclear. We have also tested copying our entire release folder to another folder and making the server and client against this (the binder is made automatically with make release). These are the commands we used (after generating .o files) to link without the aid our our makefile (this was done to ensure we were not accidentally relying on other external headers/files or other constructs).
+We also use clang++ for compilation and testing so this should also be during your use of this as well. Our make file is quite extensive on the flags required for compilation of clients and servers against the library and can be consulted as a guide if it is at all unclear. We have also tested copying our entire release folder to another folder and making the server and client against this (the binder is made automatically with make release). These are the commands we used to compile and like without the aid our our makefile (this was done to ensure we were not accidentally relying on other external headers/files or other constructs).
 \begin{center}
+make release\\
+cp release/* \$TESTING\_DIR\\
+cp client/* \$TESTING\_DIR\\
+cp server/* \$TESTING\_DIR\\
+cd \$TESTING\_DIR\\
+clang++ -c server\_functions.c client1.c server\_function\_skels.c server.c\\
 clang++ -pthread -L. server.o server\_function\_skels.o server\_functions.o -o server -lrpc\\
 clang++ -pthread -L. client1.o -o client -lrpc
 \end{center}
+
 \noindent
+\newline
 {\bf Data Messages and Marshalling}\newline
 Our system messages are packed quite tightly, with no extraneous bytes if it can be helped. Most messages have unique formats for messaging specific to their duty.
 \newline\newline
